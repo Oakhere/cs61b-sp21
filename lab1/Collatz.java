@@ -3,9 +3,8 @@
  */
 public class Collatz {
 
-    /** Buggy implementation of nextNumber! */
+    /** Return the next number in the Collatz sequence.*/
     public static int nextNumber(int n) {
-        /** Return the next number in the Collatz sequence.*/
         if (n % 2 == 0){
             return n / 2;
         } else {
