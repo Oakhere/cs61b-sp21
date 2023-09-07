@@ -7,9 +7,9 @@ public class Collatz {
     public static int nextNumber(int n) {
         /** Return the next number in the Collatz sequence.*/
         if (n % 2 == 0){
-            return n / 2
+            return n / 2;
         } else {
-            return 3 * n + 1
+            return 3 * n + 1;
         }
     }
 
