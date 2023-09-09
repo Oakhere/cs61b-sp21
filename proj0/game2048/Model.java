@@ -138,6 +138,13 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -147,7 +154,16 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++){
+            for (int j = 0; j < b.size(); j++){
+                if (b.tile(i, j) == null){
+                    continue;
+                }
+                if (b.tile(i, j).value() == MAX_PIECE) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +175,30 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)){
+            return true;
+        } else if (adjacentSameValueExists(b)) {
+            return true;
+        }
+        return false;
+    }
+    /** In the case that the board has NO empty space, return
+     * true if there are two adjacent tile with the same value.*/
+    public static boolean adjacentSameValueExists(Board b){
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size() - 1; j++) {
+                if (b.tile(i, j).value() == b.tile(i, j + 1).value()){
+                    return true;
+                }
+            }
+        }
+        for (int i = 0; i < b.size() - 1; i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (b.tile(i, j).value() == b.tile(i + 1, j).value()){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
