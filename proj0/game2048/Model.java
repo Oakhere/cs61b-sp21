@@ -138,9 +138,10 @@ public class Model extends Observable {
     /**Move Tile T if it's possible, i.e. if there exists an empty
      * tile in its direction, or a tile that can be merged.*/
     public void moveIfPossible(Tile t) {
-        if (moveTo(t) != -1) {
-            if (board.move(t.col(), moveTo(t), t)) {
-                score += board.tile(t.col(), moveTo(t)).value();
+        int row = moveTo(t);
+        if (row != -1) {
+            if (board.move(t.col(), row, t)) {
+                score += board.tile(t.col(), row).value();
             }
         }
     }
@@ -151,8 +152,13 @@ public class Model extends Observable {
         int emptyAt = -1;
         int mergeAt = -1;
         for (int row = t.row(); row < board.size(); row++) {
-            if (board.tile(t.col(), row) != null) {
-                emptyAt = row;
+            if (row == board.size() - 1) {
+                break;
+            }
+            if (board.tile(t.col(), row + 1) == null) {
+                emptyAt = row + 1;
+            }
+            if (board.tile(t.col(), row + 1) != null) {
                 break;
             }
         }
@@ -165,15 +171,12 @@ public class Model extends Observable {
                 break;
             }
         }
-        if (emptyAt == t.row()) {
-            emptyAt = -1;
-        }
         if (emptyAt > mergeAt) {
             return emptyAt;
         } else if (mergeAt > emptyAt) {
-            return  mergeAt;
+            return mergeAt;
         } else {
-            return  -1;
+            return -1;
         }
 
     }
