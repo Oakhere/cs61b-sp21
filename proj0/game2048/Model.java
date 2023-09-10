@@ -115,11 +115,59 @@ public class Model extends Observable {
         // changed local variable to true.
 
         checkGameOver();
+        if (! gameOver) {
+            changed = true;
+        }
         if (changed) {
             setChanged();
         }
         return changed;
     }
+
+    /**Handle column COL independently after one tilt.*/
+    public void handleOneColumn(int col) {
+        for (int row = size() - 2; row >= 0; row--) {
+            Tile t = board.tile(col, row);
+            if (t != null) {
+                moveIfPossible(t);
+            }
+        }
+    }
+    /**Move Tile T if it's possible, i.e. if there exists an empty
+     * tile in its direction, or a tile that can be merged.*/
+    public void moveIfPossible(Tile t) {
+        if (emptyTileAt(t) != -1) {
+            board.move(t.col(), emptyTileAt(t), t);
+        }
+        if (mergeTileAt(t) != -1) {
+            board.move(t.col(), mergeTileAt(t), t);
+            score += board.tile(t.col(), mergeTileAt(t), t);
+        }
+    }
+
+
+
+    public int moveTo(Tile t) {
+        int emptyAt;
+        int mergeAt;
+        for (int row = t.row(); row < board.size(); row++) {
+            if (board.tile(t.col(), row) != null) {
+                emptyAt = row;
+                break;
+            }
+        }
+        for (int row = t.row() + 1; row < board.size(); row++) {
+            if (board.tile(t.col(), row).value() == t.value()) {
+                mergeAt = row;
+                break;
+            }
+        }
+        if (row == t.row()) {
+            return -1;
+        }
+        return row;
+    }
+
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
