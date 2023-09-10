@@ -113,7 +113,9 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        for (int col = 0; col < size(); col++) {
+            handleOneColumn(col);
+        }
         checkGameOver();
         if (! gameOver) {
             changed = true;
@@ -136,20 +138,18 @@ public class Model extends Observable {
     /**Move Tile T if it's possible, i.e. if there exists an empty
      * tile in its direction, or a tile that can be merged.*/
     public void moveIfPossible(Tile t) {
-        if (emptyTileAt(t) != -1) {
-            board.move(t.col(), emptyTileAt(t), t);
-        }
-        if (mergeTileAt(t) != -1) {
-            board.move(t.col(), mergeTileAt(t), t);
-            score += board.tile(t.col(), mergeTileAt(t), t);
+        if (moveTo(t) != -1) {
+            if (board.move(t.col(), moveTo(t), t)) {
+                score += board.tile(t.col(), moveTo(t)).value();
+            }
         }
     }
 
-
-
+    /** Return the row of the place that Tile T can move to.
+     * Return -1 if there's no such place. */
     public int moveTo(Tile t) {
-        int emptyAt;
-        int mergeAt;
+        int emptyAt = -1;
+        int mergeAt = -1;
         for (int row = t.row(); row < board.size(); row++) {
             if (board.tile(t.col(), row) != null) {
                 emptyAt = row;
@@ -157,15 +157,25 @@ public class Model extends Observable {
             }
         }
         for (int row = t.row() + 1; row < board.size(); row++) {
+            if (board.tile(t.col(), row) == null) {
+                continue;
+            }
             if (board.tile(t.col(), row).value() == t.value()) {
                 mergeAt = row;
                 break;
             }
         }
-        if (row == t.row()) {
-            return -1;
+        if (emptyAt == t.row()) {
+            emptyAt = -1;
         }
-        return row;
+        if (emptyAt > mergeAt) {
+            return emptyAt;
+        } else if (mergeAt > emptyAt) {
+            return  mergeAt;
+        } else {
+            return  -1;
+        }
+
     }
 
 
