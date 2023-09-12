@@ -128,29 +128,35 @@ public class Model extends Observable {
 
     /**Handle column COL independently after one tilt.*/
     public void handleOneColumn(int col) {
+        boolean lastMerged = false;
         for (int row = size() - 2; row >= 0; row--) {
             Tile t = board.tile(col, row);
             if (t != null) {
-                moveIfPossible(t);
-            }
-        }
-    }
-    /**Move Tile T if it's possible, i.e. if there exists an empty
-     * tile in its direction, or a tile that can be merged.*/
-    public void moveIfPossible(Tile t) {
-        int row = moveTo(t);
-        if (row != -1) {
-            if (board.move(t.col(), row, t)) {
-                score += board.tile(t.col(), row).value();
+                int emptyAt = findSpace(t)[0];
+                int mergeAt = findSpace(t)[1];
+                if (!lastMerged) {
+                    if (emptyAt > mergeAt) {
+                        lastMerged = board.move(t.col(), emptyAt, t);
+                    } else if (emptyAt < mergeAt) {
+                        lastMerged = board.move(t.col(), mergeAt, t);
+                        score += board.tile(t.col(), mergeAt).value();
+                    }
+                } else {
+                    if (emptyAt > 0) {
+                        lastMerged = board.move(t.col(), emptyAt, t);
+                    }
+                }
             }
         }
     }
 
-    /** Return the row of the place that Tile T can move to.
-     * Return -1 if there's no such place. */
-    public int moveTo(Tile t) {
+
+    /** Find the row of the place that Tile T can move to, including an empty
+     * space and a space that can be merged, and return them as an array*/
+    public int[] findSpace(Tile t) {
         int emptyAt = -1;
         int mergeAt = -1;
+        // Find empty space to move in.
         for (int row = t.row(); row < board.size(); row++) {
             if (row == board.size() - 1) {
                 break;
@@ -162,6 +168,7 @@ public class Model extends Observable {
                 break;
             }
         }
+        // Find merge space to move in.
         for (int row = t.row() + 1; row < board.size(); row++) {
             if (board.tile(t.col(), row) == null) {
                 continue;
@@ -171,14 +178,7 @@ public class Model extends Observable {
                 break;
             }
         }
-        if (emptyAt > mergeAt) {
-            return emptyAt;
-        } else if (mergeAt > emptyAt) {
-            return mergeAt;
-        } else {
-            return -1;
-        }
-
+        return new int[]{emptyAt, mergeAt};
     }
 
 
@@ -265,7 +265,7 @@ public class Model extends Observable {
 
 
     @Override
-     /** Returns the model as a string, used for debugging. */
+    /** Returns the model as a string, used for debugging. */
     public String toString() {
         Formatter out = new Formatter();
         out.format("%n[%n");
