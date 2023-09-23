@@ -53,6 +53,26 @@ public class LinkedListDeque<T> {
 
     /** Returns true if deque is empty, false otherwise.*/
     public boolean isEmpty() {
-
+        if (size == 0) {
+            return true;
+        }
+        return  false;
     }
+
+    /** Returns the number of items in the deque. */
+    public int size() {
+        return size;
+    }
+
+    /** Prints the items in the deque from first to last, separated by a space.
+     * Once all the items have been printed, print out a new line. */
+    public void printDeque() {
+        Node p = first;
+        while (!p.equals(last)) {
+            System.out.print(p.item + " ");
+            p = p.next;
+        }
+        System.out.println(last.item);
+    }
+    
 }
