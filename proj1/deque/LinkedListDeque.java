@@ -3,23 +3,24 @@ package deque;
 import jh61b.junit.In;
 
 public class LinkedListDeque<T> {
-    private Node sentinel;
-    private Node first;
-    private Node last;
+    // This is so strange. Why do I have to put <T> after Node otherwise cause error?
+    private Node<T> sentinel;
+    private Node<T> first;
+    private Node<T> last;
     private int size;
 
     public static class Node<T> {
-        public Node pre;
+        public Node<T> pre;
         public T item;
-        public Node next;
-        public Node(Node p, T i, Node n) {
+        public Node<T> next;
+        public Node(Node<T> p, T i, Node<T> n) {
             item = i;
             pre = p;
             next = n;
         }
     }
     public LinkedListDeque() {
-        sentinel = new Node(sentinel, null, sentinel);
+        sentinel = new Node<>(sentinel, null, sentinel);
         size = 0;
         first = sentinel;
         last = sentinel;
@@ -32,7 +33,7 @@ public class LinkedListDeque<T> {
             sentinel.item = item;
         }
         size += 1;
-        Node p = new Node(sentinel, item, first);
+        Node<T> p = new Node<>(sentinel, item, first);
         first.pre = p;
         sentinel.next = p;
         first = p;
@@ -45,7 +46,7 @@ public class LinkedListDeque<T> {
             sentinel.item = item;
         }
         size += 1;
-        Node p = new Node(last, item, sentinel);
+        Node<T> p = new Node<>(last, item, sentinel);
         last.next = p;
         sentinel.pre = p;
         last = p;
@@ -53,10 +54,7 @@ public class LinkedListDeque<T> {
 
     /** Returns true if deque is empty, false otherwise.*/
     public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return  false;
+        return size ==0;
     }
 
     /** Returns the number of items in the deque. */
@@ -67,12 +65,53 @@ public class LinkedListDeque<T> {
     /** Prints the items in the deque from first to last, separated by a space.
      * Once all the items have been printed, print out a new line. */
     public void printDeque() {
-        Node p = first;
+        Node<T> p = first;
         while (!p.equals(last)) {
             System.out.print(p.item + " ");
             p = p.next;
         }
         System.out.println(last.item);
     }
-    
+
+    /** Removes and returns the item at the front of the deque.
+     * If no such item exists, returns null. */
+    public T removeFirst() {
+        if (sentinel.item == null) {
+            return null;
+        }
+        T itemToReturn = first.item;
+        sentinel.next = first.next;
+        first = first.next;
+        first.pre = sentinel;
+        size--;
+        return  itemToReturn;
+    }
+
+    /** Removes and returns the item at the back of the deque.
+    If no such item exists, returns null.*/
+    public T removeLast() {
+        if (sentinel.item == null) {
+            return null;
+        }
+        T itemToReturn = last.item;
+        sentinel.pre = last.pre;
+        last = last.pre;
+        last.next = sentinel;
+        size--;
+        return  itemToReturn;
+    }
+
+    /** Gets the item at the given index, where 0 is the front, 1 is the next item,
+     * and so forth. If no such item exists, returns null.
+     * Must not alter the deque! */
+    public T get(int index) {
+        if (index + 1 > size) {
+            return null;
+        }
+        Node<T> currentNode = first;
+        for (int i = 0; i < index; i++) {
+            currentNode = currentNode.next;
+        }
+        return currentNode.item;
+    }
 }
