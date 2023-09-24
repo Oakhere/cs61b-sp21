@@ -2,14 +2,13 @@ package deque;
 
 public class ArrayDeque<T> {
     private int size;
-    private T[] items;
+    private T[] items = (T[]) new Object[8];
+    // The starting length of the array is 8.
     private int nextFirst;
     private int nextLast;
 
     public ArrayDeque() {
         size = 0;
-        // The starting length of the array is 8.
-        T[] items = (T[]) new Object[8];
         nextFirst = 8 - 1;
         nextLast = 0;
     }
