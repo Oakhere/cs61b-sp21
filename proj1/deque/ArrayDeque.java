@@ -18,12 +18,14 @@ public class ArrayDeque<T> {
         items[nextFirst] = item;
         nextFirst--;
         size++;
+        resizeUp();
     }
 
     public void addLast(T item) {
         items[nextLast] = item;
         nextLast++;
         size++;
+        resizeUp();
     }
 
     public boolean isEmpty() {
@@ -45,14 +47,22 @@ public class ArrayDeque<T> {
     }
 
     public T removeFirst() {
+        if (size == 0) {
+            return null;
+        }
         nextFirst++;
         size--;
+        resizeDown();
         return items[nextFirst + 1];
     }
 
     public T removeLast() {
+        if (size == 0) {
+            return null;
+        }
         nextLast--;
         size--;
+        resizeDown();
         return items[nextLast - 1];
     }
 
@@ -61,6 +71,25 @@ public class ArrayDeque<T> {
             return null;
         }
         return items[nextFirst - items.length];
+    }
+
+    /** For arrays of length 16 or more, if the usage ratio is less than 25%,
+     * resize the size of the array down.*/
+    public void resizeDown() {
+        double usageRatio = (double) size / items.length;
+        int RFACTOR = 3;
+        if (items.length >= 16 && usageRatio < 0.25) {
+            T[] a = (T[]) new Object[items.length / RFACTOR];
+            System.arraycopy(items, 0, a, 0, size);
+            items = a;
+        }
+    }
+    /** Resize the size up by RFACTOR. */
+    public void resizeUp() {
+        int RFACTOR = 3;
+        T[] a = (T[]) new Object[items.length * RFACTOR];
+        System.arraycopy(items, 0, a, 0, size);
+        items = a;
     }
 
 
