@@ -52,7 +52,7 @@ public class LinkedListDeque<T> {
         last = p;
     }
 
-    /** Returns true if deque is empty, false otherwise.*/
+    /** Returns true if deque is empty, false otherwise. */
     public boolean isEmpty() {
         return size ==0;
     }
@@ -114,4 +114,22 @@ public class LinkedListDeque<T> {
         }
         return currentNode.item;
     }
+    /** Same as the get method above, but use recursion. */
+    public T getRecursive(int index) {
+        if (index + 1 > size) {
+            return null;
+        }
+        return getRecursiveHelper(index, first);
+    }
+
+    public T getRecursiveHelper(int index, Node<T> first) {
+        if (index == 0) {
+            return first.item;
+        }
+        return getRecursiveHelper(index - 1, first.next);
+    }
+    /** Returns whether the parameter o is equal to the Deque.
+     * o is considered equal if it is a Deque and if it contains the same contents
+     * (as governed by the generic T’s equals method) in the same order. */
+
 }
