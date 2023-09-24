@@ -44,15 +44,18 @@ public class ArrayDeque<T> {
         }
         System.out.println();
     }
-
+    
     public T removeFirst() {
         if (size == 0) {
             return null;
         }
-        nextFirst++;
+        T itemToReturn = items[(nextFirst + 1) % items.length];
+        if (nextFirst < items.length - 1) {
+            nextFirst++;
+        }
         size--;
         resizeDown();
-        return items[nextFirst + 1];
+        return itemToReturn;
     }
 
     public T removeLast() {
@@ -62,7 +65,7 @@ public class ArrayDeque<T> {
         nextLast--;
         size--;
         resizeDown();
-        return items[nextLast - 1];
+        return items[nextLast];
     }
 
     public T get(int index) {
