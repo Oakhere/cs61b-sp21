@@ -9,7 +9,7 @@ public class LinkedListDeque<T> {
     private Node<T> last;
     private int size;
 
-    public static class Node<T> {
+    private static class Node<T> {
         public Node<T> pre;
         public T item;
         public Node<T> next;
@@ -122,7 +122,7 @@ public class LinkedListDeque<T> {
         return getRecursiveHelper(index, first);
     }
 
-    public T getRecursiveHelper(int index, Node<T> first) {
+    private T getRecursiveHelper(int index, Node<T> first) {
         if (index == 0) {
             return first.item;
         }

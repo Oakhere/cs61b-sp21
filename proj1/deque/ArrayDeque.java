@@ -2,8 +2,7 @@ package deque;
 
 public class ArrayDeque<T> {
     private int size;
-    private T[] items = (T[]) new Object[8];
-    // The starting length of the array is 8.
+    private T[] items = (T[]) new Object[8]; // The starting length of the array is 8.
     private int nextFirst;
     private int nextLast;
 
@@ -17,14 +16,18 @@ public class ArrayDeque<T> {
         items[nextFirst] = item;
         nextFirst--;
         size++;
-        resizeUp();
+        if (size == items.length) {
+            resizeUp();
+        }
     }
 
     public void addLast(T item) {
         items[nextLast] = item;
         nextLast++;
         size++;
-        resizeUp();
+        if (size == items.length) {
+            resizeUp();
+        }
     }
 
     public boolean isEmpty() {
@@ -49,11 +52,10 @@ public class ArrayDeque<T> {
         if (size == 0) {
             return null;
         }
-        T itemToReturn = items[(nextFirst + 1) % items.length];
-        if (nextFirst < items.length - 1) {
-            nextFirst++;
-        }
+        int first = firstHelper(nextFirst);
+        T itemToReturn = items[first];
         size--;
+        nextFirst = first;
         resizeDown();
         return itemToReturn;
     }
@@ -62,10 +64,12 @@ public class ArrayDeque<T> {
         if (size == 0) {
             return null;
         }
-        nextLast--;
+        int last = lastHelper(nextLast);
+        T itemToReturn = items[last];
         size--;
+        nextLast = last;
         resizeDown();
-        return items[nextLast];
+        return itemToReturn;
     }
 
     public T get(int index) {
@@ -77,9 +81,9 @@ public class ArrayDeque<T> {
 
     /** For arrays of length 16 or more, if the usage ratio is less than 25%,
      * resize the size of the array down.*/
-    public void resizeDown() {
+    private void resizeDown() {
         double usageRatio = (double) size / items.length;
-        int RFACTOR = 3;
+        int RFACTOR = 2;
         if (items.length >= 16 && usageRatio < 0.25) {
             T[] a = (T[]) new Object[items.length / RFACTOR];
             System.arraycopy(items, 0, a, 0, size);
@@ -87,11 +91,26 @@ public class ArrayDeque<T> {
         }
     }
     /** Resize the size up by RFACTOR. */
-    public void resizeUp() {
-        int RFACTOR = 3;
+    private void resizeUp() {
+        int RFACTOR = 2;
         T[] a = (T[]) new Object[items.length * RFACTOR];
         System.arraycopy(items, 0, a, 0, size);
         items = a;
+    }
+
+    /** Given nextLast, returns the last index of the deque. */
+    private int lastHelper(int nextLast) {
+        if (nextLast > 0) {
+            return nextLast - 1;
+        }
+        return items.length - 1;
+    }
+    /** Given nextFirst, returns the first index of the deque. */
+    private int firstHelper(int nextFirst) {
+        if (nextFirst < 7) {
+            return nextFirst + 1;
+        }
+        return 0;
     }
 
 
