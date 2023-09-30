@@ -56,9 +56,9 @@ public class ArrayDequeTest {
         adeque.addFirst(5);
         adeque.addFirst(6);
         // The deque is like this: 6 5 2 1 3 4
-        assertEquals((int)adeque.get(4), 1);
-        assertEquals((int)adeque.get(1), 6);
-        assertEquals((int)adeque.get(6), 4);
+        assertEquals((int)adeque.get(3), 1);
+        assertEquals((int)adeque.get(0), 6);
+        assertEquals((int)adeque.get(5), 4);
     }
 
     @Test

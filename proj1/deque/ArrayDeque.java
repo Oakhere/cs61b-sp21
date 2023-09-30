@@ -72,11 +72,12 @@ public class ArrayDeque<T> {
         return itemToReturn;
     }
 
+    /** Gets the item at the given index, where 0 is the front. */
     public T get(int index) {
-        if (index > size) {
+        if (index > size - 1) {
             return null;
         }
-        return items[(nextFirst + index) % items.length];
+        return items[(nextFirst + index + 1) % items.length];
     }
 
     /** For arrays of length 16 or more, if the usage ratio is less than 25%,
