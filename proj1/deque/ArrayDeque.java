@@ -17,7 +17,7 @@ public class ArrayDeque<T> {
         nextFirst--;
         size++;
         if (size == items.length) {
-            resizeUp();
+            //resizeUp();
         }
     }
 
@@ -26,7 +26,7 @@ public class ArrayDeque<T> {
         nextLast++;
         size++;
         if (size == items.length) {
-            resizeUp();
+            //resizeUp();
         }
     }
 
@@ -56,7 +56,7 @@ public class ArrayDeque<T> {
         T itemToReturn = items[first];
         size--;
         nextFirst = first;
-        resizeDown();
+        //resizeDown();
         return itemToReturn;
     }
 
@@ -68,7 +68,7 @@ public class ArrayDeque<T> {
         T itemToReturn = items[last];
         size--;
         nextLast = last;
-        resizeDown();
+        //resizeDown();
         return itemToReturn;
     }
 
@@ -76,7 +76,7 @@ public class ArrayDeque<T> {
         if (index > size) {
             return null;
         }
-        return items[nextFirst - items.length];
+        return items[(nextFirst + index) % items.length];
     }
 
     /** For arrays of length 16 or more, if the usage ratio is less than 25%,
