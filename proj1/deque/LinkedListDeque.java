@@ -32,11 +32,14 @@ public class LinkedListDeque<T> {
         if (sentinel.item == null) {
             sentinel.item = item;
         }
-        size += 1;
         Node<T> p = new Node<>(sentinel, item, first);
         first.pre = p;
         sentinel.next = p;
         first = p;
+        if (size == 0) {
+            last = p;
+        }
+        size += 1;
     }
 
     /** Adds an item of type T to the back of the deque. */
@@ -45,11 +48,14 @@ public class LinkedListDeque<T> {
         if (sentinel.item == null) {
             sentinel.item = item;
         }
-        size += 1;
         Node<T> p = new Node<>(last, item, sentinel);
         last.next = p;
         sentinel.pre = p;
         last = p;
+        if (size == 0) {
+            first = p;
+        }
+        size += 1;
     }
 
     /** Returns true if deque is empty, false otherwise. */
@@ -84,6 +90,9 @@ public class LinkedListDeque<T> {
         first = first.next;
         first.pre = sentinel;
         size--;
+        if (size == 0) {
+            last = sentinel;
+        }
         return  itemToReturn;
     }
 
@@ -98,6 +107,9 @@ public class LinkedListDeque<T> {
         last = last.pre;
         last.next = sentinel;
         size--;
+        if (size == 0) {
+            first = sentinel;
+        }
         return  itemToReturn;
     }
 

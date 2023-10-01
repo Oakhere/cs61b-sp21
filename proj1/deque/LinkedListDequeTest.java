@@ -138,6 +138,14 @@ public class LinkedListDequeTest {
     }
 
     @Test
+    public void printDequeTest(){
+        LinkedListDeque<Integer> ldeque = new LinkedListDeque<>();
+        ldeque.addFirst(1);
+        ldeque.addFirst(2);
+        // The deque is like this: 2 1
+        ldeque.printDeque();
+    }
+    @Test
     public void addRemoveMany() {
         LinkedListDeque<Integer> ldeque = new LinkedListDeque<>();
         ldeque.addFirst(1);
@@ -146,10 +154,14 @@ public class LinkedListDequeTest {
         ldeque.addLast(4);
         ldeque.addFirst(5);
         // The deque is like this: 5 2 1 3 4
+        ldeque.printDeque();
         assertEquals((int)ldeque.removeFirst(), 5);
         assertEquals((int)ldeque.removeLast(), 4);
         assertEquals((int)ldeque.removeLast(), 3);
         assertEquals((int)ldeque.removeLast(), 1);
         assertEquals((int)ldeque.removeFirst(), 2);
+        ldeque.addFirst(5);
+        // The deque is like this: 5
+        assertEquals((int)ldeque.removeLast(), 5);
     }
 }
