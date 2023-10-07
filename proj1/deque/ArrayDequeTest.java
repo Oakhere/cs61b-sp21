@@ -55,10 +55,14 @@ public class ArrayDequeTest {
         adeque.addLast(4);
         adeque.addFirst(5);
         adeque.addFirst(6);
-        // The deque is like this: 6 5 2 1 3 4
-        assertEquals((int)adeque.get(3), 1);
-        assertEquals((int)adeque.get(0), 6);
-        assertEquals((int)adeque.get(5), 4);
+        adeque.addLast(7);
+        adeque.addFirst(8);
+        // The deque is like this: 8 6 5 2 1 3 4 7
+        adeque.addLast(9);
+        // The deque is like this: 8 6 5 2 1 3 4 7 9
+        assertEquals((int)adeque.get(3), 2);
+        assertEquals((int)adeque.get(0), 8);
+        assertEquals((int)adeque.get(5), 3);
     }
 
     @Test
@@ -82,4 +86,5 @@ public class ArrayDequeTest {
         assertEquals((int)adeque.removeFirst(), 7);
         assertEquals((int)adeque.removeFirst(), 8);
     }
+
 }

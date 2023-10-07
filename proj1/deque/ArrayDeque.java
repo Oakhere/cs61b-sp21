@@ -1,5 +1,7 @@
 package deque;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
+
 public class ArrayDeque<T> {
     private int size;
     private T[] items = (T[]) new Object[8]; // The starting length of the array is 8.
@@ -13,21 +15,23 @@ public class ArrayDeque<T> {
     }
 
     public void addFirst(T item) {
-        items[nextFirst] = item;
-        nextFirst--;
         size++;
         if (size == items.length) {
-            //resizeUp();
+            resize(size * 2);
+            nextFirst = items.length - 1 - (size - 1 - nextFirst);
         }
+        items[nextFirst] = item;
+        nextFirst--;
     }
 
     public void addLast(T item) {
-        items[nextLast] = item;
-        nextLast++;
         size++;
         if (size == items.length) {
-            //resizeUp();
+            resize(size * 2);
+            nextFirst = items.length / 2 - 1 - nextFirst - 1;
         }
+        items[nextLast] = item;
+        nextLast++;
     }
 
     public boolean isEmpty() {
@@ -56,7 +60,12 @@ public class ArrayDeque<T> {
         T itemToReturn = items[first];
         size--;
         nextFirst = first;
-        //resizeDown();
+        // Check usage ratio
+        if (items.length >= 16 && (double)size / items.length < 0.25) {
+            T[] a = (T[]) new Object[items.length / 4];
+            System.arraycopy(items, 0, a, 0, size);
+            items = a;
+        }
         return itemToReturn;
     }
 
@@ -96,6 +105,13 @@ public class ArrayDeque<T> {
         int RFACTOR = 2;
         T[] a = (T[]) new Object[items.length * RFACTOR];
         System.arraycopy(items, 0, a, 0, size);
+        items = a;
+    }
+
+    private void resize(int toSize) {
+        T[] a = (T[]) new Object[toSize];
+        System.arraycopy(items, 0, a, 0, nextFirst);
+        System.arraycopy(items, size - 1 - nextFirst, a, toSize - 1 - nextFirst, size - 1 - nextFirst);
         items = a;
     }
 
