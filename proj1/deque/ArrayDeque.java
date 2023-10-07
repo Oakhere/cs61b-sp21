@@ -62,9 +62,9 @@ public class ArrayDeque<T> {
         nextFirst = first;
         // Check usage ratio
         if (items.length >= 16 && (double)size / items.length < 0.25) {
-            T[] a = (T[]) new Object[items.length / 4];
-            System.arraycopy(items, 0, a, 0, size);
-            items = a;
+            int rightPartLength = items.length - nextFirst - 1;
+            resize(items.length / 4);
+            nextFirst = items.length - 1 - rightPartLength;
         }
         return itemToReturn;
     }
@@ -77,7 +77,11 @@ public class ArrayDeque<T> {
         T itemToReturn = items[last];
         size--;
         nextLast = last;
-        //resizeDown();
+        if (items.length >= 16 && (double)size / items.length < 0.25) {
+            int rightPartLength = items.length - nextFirst - 1;
+            resize(items.length / 4);
+            nextFirst = items.length - 1 - rightPartLength;
+        }
         return itemToReturn;
     }
 
