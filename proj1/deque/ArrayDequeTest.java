@@ -37,14 +37,14 @@ public class ArrayDequeTest {
     public void getTestOne() {
         ArrayDeque<Integer> adeque = new ArrayDeque<>();
         adeque.addFirst(1);
-        assertEquals((int)adeque.get(1), 1);
+        assertEquals((int)adeque.get(0), 1);
     }
     @Test
     public void getTestTwo() {
         ArrayDeque<Integer> adeque = new ArrayDeque<>();
         adeque.addFirst(1);
         adeque.addLast(2);
-        assertEquals((int)adeque.get(1), 1);
+        assertEquals((int)adeque.get(1), 2);
     }
     @Test
     public void getTest() {
@@ -85,6 +85,15 @@ public class ArrayDequeTest {
         assertEquals((int)adeque.removeFirst(), 4);
         assertEquals((int)adeque.removeFirst(), 7);
         assertEquals((int)adeque.removeFirst(), 8);
+    }
+
+    @Test
+    public void randomizedTest() {
+        ArrayDeque<Integer> D = new ArrayDeque<>();
+        int N = 500;
+        for (int i = 0; i < N; i++) {
+
+        }
     }
 
 }

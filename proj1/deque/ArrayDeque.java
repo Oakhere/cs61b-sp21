@@ -15,23 +15,21 @@ public class ArrayDeque<T> {
     }
 
     public void addFirst(T item) {
-        size++;
         if (size == items.length) {
             resize(size * 2);
-            nextFirst = items.length - 1 - (size - 1 - nextFirst);
         }
+        size++;
         items[nextFirst] = item;
-        nextFirst--;
+        nextFirst = (nextFirst - 1) % items.length;
     }
 
     public void addLast(T item) {
-        size++;
         if (size == items.length) {
             resize(size * 2);
-            nextFirst = items.length / 2 - 1 - nextFirst - 1;
         }
+        size++;
         items[nextLast] = item;
-        nextLast++;
+        nextLast = (nextLast + 1) % items.length;
     }
 
     public boolean isEmpty() {
@@ -56,15 +54,13 @@ public class ArrayDeque<T> {
         if (size == 0) {
             return null;
         }
-        int first = firstHelper(nextFirst);
+        int first = (nextFirst + 1) % items.length;
         T itemToReturn = items[first];
-        size--;
         nextFirst = first;
+        size--;
         // Check usage ratio
         if (items.length >= 16 && (double)size / items.length < 0.25) {
-            int rightPartLength = items.length - nextFirst - 1;
             resize(items.length / 4);
-            nextFirst = items.length - 1 - rightPartLength;
         }
         return itemToReturn;
     }
@@ -73,14 +69,17 @@ public class ArrayDeque<T> {
         if (size == 0) {
             return null;
         }
-        int last = lastHelper(nextLast);
+        int last = (nextLast - 1) % items.length;
+        // The % operator in Java works differently than in Python
+        // e.g. Make sure -1 % 8 is 7, not -1
+        if (last < 0) {
+            last += items.length;
+        }
         T itemToReturn = items[last];
-        size--;
         nextLast = last;
+        size--;
         if (items.length >= 16 && (double)size / items.length < 0.25) {
-            int rightPartLength = items.length - nextFirst - 1;
             resize(items.length / 4);
-            nextFirst = items.length - 1 - rightPartLength;
         }
         return itemToReturn;
     }
@@ -93,46 +92,18 @@ public class ArrayDeque<T> {
         return items[(nextFirst + index + 1) % items.length];
     }
 
-    /** For arrays of length 16 or more, if the usage ratio is less than 25%,
-     * resize the size of the array down.*/
-    private void resizeDown() {
-        double usageRatio = (double) size / items.length;
-        int RFACTOR = 2;
-        if (items.length >= 16 && usageRatio < 0.25) {
-            T[] a = (T[]) new Object[items.length / RFACTOR];
-            System.arraycopy(items, 0, a, 0, size);
-            items = a;
-        }
-    }
-    /** Resize the size up by RFACTOR. */
-    private void resizeUp() {
-        int RFACTOR = 2;
-        T[] a = (T[]) new Object[items.length * RFACTOR];
-        System.arraycopy(items, 0, a, 0, size);
-        items = a;
-    }
-
     private void resize(int toSize) {
         T[] a = (T[]) new Object[toSize];
-        System.arraycopy(items, 0, a, 0, nextFirst);
-        System.arraycopy(items, size - 1 - nextFirst, a, toSize - 1 - nextFirst, size - 1 - nextFirst);
+        // List all the elements in order in the new array.
+        for (int i = 0; i < size; i++) {
+            a[i] = get(i);
+        }
+        nextFirst = a.length - 1;
+        nextLast = size - 1;
         items = a;
     }
 
-    /** Given nextLast, returns the last index of the deque. */
-    private int lastHelper(int nextLast) {
-        if (nextLast > 0) {
-            return nextLast - 1;
-        }
-        return items.length - 1;
-    }
-    /** Given nextFirst, returns the first index of the deque. */
-    private int firstHelper(int nextFirst) {
-        if (nextFirst < 7) {
-            return nextFirst + 1;
-        }
-        return 0;
-    }
+
 
 
 }
