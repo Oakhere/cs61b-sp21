@@ -59,10 +59,12 @@ public class ArrayDequeTest {
         adeque.addFirst(8);
         // The deque is like this: 8 6 5 2 1 3 4 7
         adeque.addLast(9);
-        // The deque is like this: 8 6 5 2 1 3 4 7 9
-        assertEquals((int)adeque.get(3), 2);
-        assertEquals((int)adeque.get(0), 8);
-        assertEquals((int)adeque.get(5), 3);
+        adeque.addFirst(10);
+        // The deque is like this: 10 8 6 5 2 1 3 4 7 9
+        assertEquals((int)adeque.get(3), 5);
+        assertEquals((int)adeque.get(0), 10);
+        assertEquals((int)adeque.get(5), 1);
+        assertEquals((int)adeque.get(8), 7);
     }
 
     @Test
@@ -86,7 +88,32 @@ public class ArrayDequeTest {
         assertEquals((int)adeque.removeFirst(), 7);
         assertEquals((int)adeque.removeFirst(), 8);
     }
-
+    @Test
+    public void fillUpThenEmptyTwo() {
+        ArrayDeque<Integer> adeque = new ArrayDeque<>();
+        adeque.addFirst(1);
+        adeque.addFirst(2);
+        adeque.addLast(3);
+        adeque.addLast(4);
+        adeque.addFirst(5);
+        adeque.addFirst(6);
+        adeque.addLast(7);
+        adeque.addLast(8);
+        adeque.addFirst(9);
+        adeque.addLast(10);
+        // The deque is like this: 9 6 5 2 1 3 4 7 8 10
+        adeque.removeFirst();
+        adeque.removeFirst();
+        adeque.removeFirst();
+        adeque.removeFirst();
+        adeque.removeLast();
+        // 1 3 4 7 8
+        assertEquals((int)adeque.removeFirst(), 1);
+        assertEquals((int)adeque.removeLast(), 8);
+        assertEquals((int)adeque.removeFirst(), 3);
+        assertEquals((int)adeque.removeFirst(), 4);
+        assertEquals((int)adeque.removeLast(), 7);
+    }
     @Test
     public void randomizedTest() {
         ArrayDeque<Integer> D = new ArrayDeque<>();

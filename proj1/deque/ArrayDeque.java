@@ -2,7 +2,7 @@ package deque;
 
 import afu.org.checkerframework.checker.oigj.qual.O;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private int size;
     private T[] items = (T[]) new Object[8]; // The starting length of the array is 8.
     private int nextFirst;
@@ -14,6 +14,7 @@ public class ArrayDeque<T> {
         nextLast = 0;
     }
 
+    @Override
     public void addFirst(T item) {
         if (size == items.length) {
             resize(size * 2);
@@ -23,6 +24,7 @@ public class ArrayDeque<T> {
         nextFirst = (nextFirst - 1) % items.length;
     }
 
+    @Override
     public void addLast(T item) {
         if (size == items.length) {
             resize(size * 2);
@@ -32,14 +34,12 @@ public class ArrayDeque<T> {
         nextLast = (nextLast + 1) % items.length;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
+    @Override
     public int size() {
         return size;
     }
 
+    @Override
     public void printDeque() {
         for (int i = nextFirst + 1; i < items.length; i++) {
             System.out.print(items[i] + " ");
@@ -49,7 +49,8 @@ public class ArrayDeque<T> {
         }
         System.out.println();
     }
-    
+
+    @Override
     public T removeFirst() {
         if (size == 0) {
             return null;
@@ -65,6 +66,7 @@ public class ArrayDeque<T> {
         return itemToReturn;
     }
 
+    @Override
     public T removeLast() {
         if (size == 0) {
             return null;
@@ -84,6 +86,7 @@ public class ArrayDeque<T> {
         return itemToReturn;
     }
 
+    @Override
     /** Gets the item at the given index, where 0 is the front. */
     public T get(int index) {
         if (index > size - 1) {
@@ -99,11 +102,28 @@ public class ArrayDeque<T> {
             a[i] = get(i);
         }
         nextFirst = a.length - 1;
-        nextLast = size - 1;
+        nextLast = size;
         items = a;
     }
 
-
-
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ArrayDeque)) {
+            return false;
+        }
+        ArrayDeque<T> oDeque = (ArrayDeque<T>) o;
+        if (size != oDeque.size) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (items[i] != oDeque.items[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

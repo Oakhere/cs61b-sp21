@@ -2,7 +2,7 @@ package deque;
 
 import jh61b.junit.In;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T> {
     // This is so strange. Why do I have to put <T> after Node otherwise cause error?
     private Node<T> sentinel;
     private Node<T> first;
@@ -56,11 +56,6 @@ public class LinkedListDeque<T> {
             first = p;
         }
         size += 1;
-    }
-
-    /** Returns true if deque is empty, false otherwise. */
-    public boolean isEmpty() {
-        return size ==0;
     }
 
     /** Returns the number of items in the deque. */
@@ -143,5 +138,23 @@ public class LinkedListDeque<T> {
     /** Returns whether the parameter o is equal to the Deque.
      * o is considered equal if it is a Deque and if it contains the same contents
      * (as governed by the generic T’s equals method) in the same order. */
-
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof LinkedListDeque)) {
+            return false;
+        }
+        LinkedListDeque<T> oDeque = (LinkedListDeque<T>) o;
+        if (size != oDeque.size) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (get(i) != oDeque.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
