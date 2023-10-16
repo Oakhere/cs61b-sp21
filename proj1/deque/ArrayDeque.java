@@ -1,8 +1,9 @@
 package deque;
+import java.util.Iterator;
 
 import afu.org.checkerframework.checker.oigj.qual.O;
 
-public class ArrayDeque<T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private T[] items = (T[]) new Object[8]; // The starting length of the array is 8.
     private int nextFirst;
@@ -106,6 +107,27 @@ public class ArrayDeque<T> implements Deque<T> {
         items = a;
     }
 
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int wizPos;
+
+        public ArrayDequeIterator() {
+            wizPos = 0;
+        }
+
+        public boolean hasNext() {
+            return wizPos < size;
+        }
+
+        public T next() {
+            T itemToReturn = items[wizPos];
+            wizPos += 1;
+            return itemToReturn;
+        }
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {

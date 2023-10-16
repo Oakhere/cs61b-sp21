@@ -1,9 +1,8 @@
 package deque;
-
+import java.util.Iterator;
 import jh61b.junit.In;
 
-public class LinkedListDeque<T> implements Deque<T> {
-    // This is so strange. Why do I have to put <T> after Node otherwise cause error?
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private Node<T> sentinel;
     private Node<T> first;
     private Node<T> last;
@@ -135,6 +134,33 @@ public class LinkedListDeque<T> implements Deque<T> {
         }
         return getRecursiveHelper(index - 1, first.next);
     }
+
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        int wizPos;
+
+        public LinkedListDequeIterator() {
+            wizPos = 0;
+        }
+
+        public boolean hasNext() {
+            return wizPos < size;
+        }
+
+        public T next() {
+            T itemToReturn = get(wizPos);
+            wizPos += 1;
+            return itemToReturn;
+        }
+
+    }
+
+
+
+
     /** Returns whether the parameter o is equal to the Deque.
      * o is considered equal if it is a Deque and if it contains the same contents
      * (as governed by the generic T’s equals method) in the same order. */
