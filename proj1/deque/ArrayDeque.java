@@ -1,8 +1,6 @@
 package deque;
 import java.util.Iterator;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
-
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private T[] items = (T[]) new Object[8]; // The starting length of the array is 8.
@@ -61,7 +59,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         nextFirst = first;
         size--;
         // Check usage ratio
-        if (items.length >= 16 && (double)size / items.length < 0.25) {
+        if (items.length >= 16 && (double) size / items.length < 0.25) {
             resize(items.length / 4);
         }
         return itemToReturn;
@@ -81,7 +79,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         T itemToReturn = items[last];
         nextLast = last;
         size--;
-        if (items.length >= 16 && (double)size / items.length < 0.25) {
+        if (items.length >= 16 && (double) size / items.length < 0.25) {
             resize(items.length / 4);
         }
         return itemToReturn;
@@ -114,7 +112,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private class ArrayDequeIterator implements Iterator<T> {
         private int wizPos;
 
-        public ArrayDequeIterator() {
+        ArrayDequeIterator() {
             wizPos = 0;
         }
 

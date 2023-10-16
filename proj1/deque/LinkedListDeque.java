@@ -1,6 +1,5 @@
 package deque;
 import java.util.Iterator;
-import jh61b.junit.In;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private Node<T> sentinel;
@@ -9,10 +8,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
 
     private static class Node<T> {
-        public Node<T> pre;
-        public T item;
-        public Node<T> next;
-        public Node(Node<T> p, T i, Node<T> n) {
+        private Node<T> pre;
+        private T item;
+        private Node<T> next;
+        private Node(Node<T> p, T i, Node<T> n) {
             item = i;
             pre = p;
             next = n;
@@ -142,7 +141,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class LinkedListDequeIterator implements Iterator<T> {
         int wizPos;
 
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             wizPos = 0;
         }
 
@@ -157,8 +156,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
 
     }
-
-
 
 
     /** Returns whether the parameter o is equal to the Deque.
