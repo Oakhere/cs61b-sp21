@@ -114,13 +114,22 @@ public class ArrayDequeTest {
         assertEquals((int)adeque.removeFirst(), 4);
         assertEquals((int)adeque.removeLast(), 7);
     }
-    @Test
-    public void randomizedTest() {
-        ArrayDeque<Integer> D = new ArrayDeque<>();
-        int N = 500;
-        for (int i = 0; i < N; i++) {
 
-        }
+    @Test
+    public void addFirstRemoveLastTest() {
+        ArrayDeque<Integer> adeque = new ArrayDeque<>();
+        adeque.addFirst(0);
+        adeque.addFirst(1);
+        adeque.addFirst(2);
+        adeque.addFirst(3);
+        adeque.addFirst(4);
+        adeque.addFirst(5);
+        adeque.addFirst(6);
+        assertEquals((int) adeque.removeLast(), 0);
+        adeque.addFirst(8);
+        adeque.addFirst(9);
+
     }
+
 
 }

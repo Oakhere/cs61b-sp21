@@ -21,6 +21,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         size++;
         items[nextFirst] = item;
         nextFirst = (nextFirst - 1) % items.length;
+        // The % operator in Java works differently than in Python
+        // e.g. Make sure -1 % 8 is 7, not -1
+        if (nextFirst < 0) {
+            nextFirst += items.length;
+        }
     }
 
     @Override
@@ -126,6 +131,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return itemToReturn;
         }
     }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -139,7 +145,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            if (items[i] != oDeque.get(i)) {
+            if (items[i].equals(oDeque.get(i))) {
                 return false;
             }
         }
