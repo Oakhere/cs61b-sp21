@@ -7,7 +7,7 @@ public class MidiDataExample {
     public static void main(String[] args) {
         try {
             // Load your MIDI data (replace with your MIDI file)
-            byte[] midiData = loadMidiDataFromFile("/Users/oak/Downloads/HappyHappyBirthdayBaby.mid");
+            byte[] midiData = loadMidiDataFromFile("/Users/oak/Downloads/something.mid");
 
             // Compress the MIDI data using GZIP
             ByteArrayOutputStream compressedData = new ByteArrayOutputStream();
