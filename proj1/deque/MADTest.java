@@ -12,7 +12,7 @@ public class MADTest {
         }
     }
     @Test
-    public void TestOne () {
+    public void testOne() {
         IntComparator c = new IntComparator();
         MaxArrayDeque<Integer> madDeque = new MaxArrayDeque<>(c);
         madDeque.addFirst(1);
