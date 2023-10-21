@@ -126,12 +126,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
 
         public T next() {
-            T itemToReturn = items[wizPos];
+            T itemToReturn = get(wizPos);
             wizPos += 1;
             return itemToReturn;
         }
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -145,7 +145,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            if (items[i].equals(oDeque.get(i))) {
+            if (!get(i).equals(oDeque.get(i))) {
                 return false;
             }
         }

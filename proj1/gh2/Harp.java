@@ -4,24 +4,24 @@ import deque.Deque;
 import deque.LinkedListDeque;
 
 //Note: This file will not compile until you complete the Deque implementations
-public class GuitarString {
+public class Harp {
     /** Constants. Do not change. In case you're curious, the keyword final
      * means the values cannot be changed at runtime. We'll discuss this and
      * other topics in lecture on Friday. */
     private static final int SR = 44100;      // Sampling Rate
-    private static final double DECAY = .995; // energy decay factor
+    private static final double DECAY = .999; // energy decay factor 0.996
 
     /* Buffer for storing sound data. */
     private Deque<Double> buffer;
 
     /* Create a guitar string of the given frequency.  */
-    public GuitarString(double frequency) {
-        // Create a buffer with capacity = SR / frequency. You'll need to
+    public Harp(double frequency) {
+        // Create a buffer with capacity = SR / frequency * 2. You'll need to
         //       cast the result of this division operation into an int. For
         //       better accuracy, use the Math.round() function before casting.
         //       Your should initially fill your buffer array with zeros.
         buffer = new LinkedListDeque<>();
-        int capacity = (int) Math.round(SR / frequency);
+        int capacity = (int) Math.round(SR / frequency) * 2;
         for (int i = 0; i < capacity; i++) {
             buffer.addFirst(0.0);
         }
@@ -54,7 +54,7 @@ public class GuitarString {
         //       the average of the two multiplied by the DECAY factor.
         //       **Do not call StdAudio.play().**
         double newDouble = (buffer.removeFirst() + buffer.get(0)) / 2 * DECAY;
-        buffer.addLast(newDouble);
+        buffer.addLast(-newDouble);
     }
 
     /* Return the double at the front of the buffer. */

@@ -14,7 +14,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         }
         T maxItem = get(0);
         for (int i = 0; i < size() - 1; i++) {
-            if (comparator.compare(get(i), get(i + 1)) < 0) {
+            if (comparator.compare(maxItem, get(i + 1)) < 0) {
                 maxItem = get(i + 1);
             }
         }
@@ -27,7 +27,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         }
         T maxItem = get(0);
         for (int i = 0; i < size() - 1; i++) {
-            if (c.compare(get(i), get(i + 1)) < 0) {
+            if (c.compare(maxItem, get(i + 1)) < 0) {
                 maxItem = get(i + 1);
             }
         }
