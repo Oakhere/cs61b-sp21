@@ -1,6 +1,10 @@
 package capers;
 
+//import edu.princeton.cs.algs4.ST;
+
 import java.io.File;
+import java.io.IOException;
+
 import static capers.Utils.*;
 
 /** A repository for Capers 
@@ -18,20 +22,29 @@ public class CapersRepository {
     static final File CWD = new File(System.getProperty("user.dir"));
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = null; // TODO Hint: look at the `join`
-                                            //      function in Utils
+    static final File CAPERS_FOLDER = Utils.join(CWD, ".capers");
+    // TODO Hint: look at the `join` function in Utils
+
+    static final File STORY_FOLDER = Utils.join(CAPERS_FOLDER, "story");
+    static final File storyText = Utils.join(STORY_FOLDER, "story.txt");
 
     /**
-     * Does required filesystem operations to allow for persistence.
+     * Does require filesystem operations to allow for persistence.
      * (creates any necessary folders or files)
      * Remember: recommended structure (you do not have to follow):
      *
      * .capers/ -- top level folder for all persistent data in your lab12 folder
-     *    - dogs/ -- folder containing all of the persistent data for dogs
+     *    - dogs/ -- folder containing all the persistent data for dogs
      *    - story -- file containing the current story
      */
-    public static void setupPersistence() {
+    public static void setupPersistence() throws IOException {
         // TODO
+        CAPERS_FOLDER.mkdir();
+        Dog.DOG_FOLDER.mkdir();
+        STORY_FOLDER.mkdir();
+        if (!storyText.exists()) {
+            storyText.createNewFile();
+        }
     }
 
     /**
@@ -41,6 +54,8 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
+        Utils.writeContents(storyText, Utils.readContentsAsString(storyText), text, "\n");
+        System.out.println(Utils.readContentsAsString(storyText));
     }
 
     /**
@@ -48,8 +63,11 @@ public class CapersRepository {
      * three non-command arguments of args (name, breed, age).
      * Also prints out the dog's information using toString().
      */
-    public static void makeDog(String name, String breed, int age) {
+    public static void makeDog(String name, String breed, int age) throws IOException {
         // TODO
+        Dog d = new Dog(name, breed, age);
+        d.saveDog();
+        System.out.println(d.toString());
     }
 
     /**
@@ -58,7 +76,10 @@ public class CapersRepository {
      * Chooses dog to advance based on the first non-command argument of args.
      * @param name String name of the Dog whose birthday we're celebrating.
      */
-    public static void celebrateBirthday(String name) {
+    public static void celebrateBirthday(String name) throws IOException {
         // TODO
+        Dog d = Dog.fromFile(name);
+        d.haveBirthday();
+        d.saveDog();
     }
 }
