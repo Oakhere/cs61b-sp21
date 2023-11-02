@@ -179,7 +179,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         return keySet().iterator();
     }
 
-    public void resize() {
+    private void resize() {
         Collection<Node>[] newBuckets = createTable(buckets.length * 2);
         for (Collection<Node> b : buckets) {
             for (Node n : b) {
