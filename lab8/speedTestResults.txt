@@ -1,0 +1,29 @@
+Insert random Strings of length 10.
+
+# strings to insert: 10000
+class hashmap.ULLMap: 0.50 sec
+class hashmap.MyHashMap: 0.02 sec
+Java's Built-in HashMap: 0.01 sec
+
+# strings to insert: 20000
+class hashmap.ULLMap: 1.94 sec
+class hashmap.MyHashMap: 0.03 sec
+Java's Built-in HashMap: 0.01 sec
+
+# strings to insert: 50000
+class hashmap.ULLMap: 12.12 sec
+class hashmap.MyHashMap: 0.03 sec
+Java's Built-in HashMap: 0.02 sec
+
+# strings to insert: 100000
+class hashmap.ULLMap: -- Stack Overflow --
+class hashmap.MyHashMap: 0.06 sec 
+Java's Built-in HashMap: 0.04 sec
+
+--------------------------------------------------------------------------------
+Insert lexicographically increasing Stringsinto Maps as <String, Integer> pairs.
+
+Enter # strings to insert: 100000
+class hashmap.ULLMap: -- Stack Overflow --
+class hashmap.MyHashMap: 0.08 sec
+Java's Built-in HashMap: 0.05 sec
