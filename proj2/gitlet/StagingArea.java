@@ -26,8 +26,4 @@ public class StagingArea implements Serializable {
         blobsForAddition.put(f.getName(), sha1(serialize(blob)));
     }
 
-    public void remove(File file) {
-
-    }
-
 }

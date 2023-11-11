@@ -40,4 +40,14 @@ public class Commit implements Serializable {
         this.blobs = new HashMap<>();
     }
 
+    public String getParent() {
+        return this.parent;
+    }
+    public Date getTimestamp() {
+        return timestamp;
+    }
+    public String getMessage() {
+        return message;
+    }
+
 }

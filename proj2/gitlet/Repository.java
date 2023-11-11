@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.*;
+import java.util.Formatter;
 import java.util.HashMap;
 import static gitlet.Utils.*;
 
@@ -149,6 +150,19 @@ public class Repository {
      * backwards along the commit tree until the initial commit, following the first
      * parent commit links, ignoring any second parents found in merge commits.*/
     public static void log() {
-
+        branches = readObject(branchesText, HashMap.class);
+        commitTree = readObject(commitTreeText, HashMap.class);
+        Commit head = branches.get("HEAD");
+        Commit current= head;
+        Formatter formatter = new Formatter();
+        while (!current.getParent().isEmpty()) {
+            System.out.println("===");
+            System.out.println("commit " + sha1(serialize(current)));
+            formatter.format("Date: %tc", current.getTimestamp());
+            System.out.println(current.getMessage());
+            current = commitTree.get(current.getParent());
+            System.out.println();
+        }
+        // need to handle merge commits
     }
 }
