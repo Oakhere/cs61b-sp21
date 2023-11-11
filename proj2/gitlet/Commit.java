@@ -2,10 +2,15 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
 import java.util.Calendar;
 import java.util.HashMap;
+
+import static gitlet.Utils.*;
+import static gitlet.Utils.writeObject;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -48,6 +53,17 @@ public class Commit implements Serializable {
     }
     public String getMessage() {
         return message;
+    }
+    /** Save the commit as a file in the disk with the file name being its SHA-1 code. */
+    public void saveCommit() throws IOException {
+        File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
+        f.createNewFile();
+        writeObject(f, this);
+    }
+    /** Get the commit object from the disk using its SHA-1 code. */
+    public static Commit getCommit(String sha1) {
+        File f = join(Repository.GITLET_DIR, sha1 + ".txt");
+        return readObject(f, Commit.class);
     }
 
 }

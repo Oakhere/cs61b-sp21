@@ -3,6 +3,8 @@ package gitlet;
 import java.io.*;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -27,12 +29,11 @@ public class Repository {
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    /** A mapping from branch heads to references to commits, so that certain
-     * important commits have symbolic names.*/
-    public static HashMap<String, Commit> branches;
-    /** Every time we make a new commit, add it to the commit tree, mapping its SHA1
-     * to the commit object. */
-    public static HashMap<String, Commit> commitTree;
+    /** A mapping from branch heads to references to commits(actually their SHA-1 code),
+     *  so that certain important commits have symbolic names.*/
+    public static HashMap<String, String> branches;
+    /** Every time we make a new commit, add it's SHA-1 to the commit tree*/
+    public static HashSet<String> commitTree;
     public static StagingArea stagingArea;
 
     /** A file to store the commit tree to disk. */
@@ -55,19 +56,23 @@ public class Repository {
      * branch: master, which initially points to this initial commit, and master
      * will be the current branch. */
     public static void init() throws IOException {
+        // failure cases
         if (GITLET_DIR.exists()) {
             message("A Gitlet version-control system already " +
                     "exists in the current directory.");
             System.exit(0);
         }
+        // create the commit tree, the branches map, and the initial commit
         setUpPersistence();
-        commitTree = new HashMap<>();
+        commitTree = new HashSet<>();
         branches = new HashMap<>();
         Commit initial = new Commit("initial commit", "");
-        commitTree.put(sha1(serialize(initial)), initial);
-        branches.put("master", initial);
+        commitTree.add(sha1(serialize(initial)));
+        branches.put("master", sha1(serialize(initial)));
         // The HEAD pointer keeps track of where in the linked list we currently are.
-        branches.put("HEAD", initial);
+        branches.put("HEAD", sha1(serialize(initial)));
+        // set persistence
+        initial.saveCommit();
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
     }
@@ -86,7 +91,7 @@ public class Repository {
 
     /** Saves a snapshot of tracked files in the current commit and staging area so
      * that they can be restored at a later time, creating a new commit.*/
-    public static void commit(String message) {
+    public static void commit(String message) throws IOException {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         // failure cases
         if (stagingArea.blobsForAddition.isEmpty()) {
@@ -97,10 +102,10 @@ public class Repository {
             message("Please enter a commit message.");
             System.exit(0);
         }
-
-        commitTree = readObject(commitTreeText, HashMap.class);
+        // find the parent commit, create a new commit
+        commitTree = readObject(commitTreeText, HashSet.class);
         branches = readObject(branchesText, HashMap.class);
-        Commit parent = branches.get("HEAD");
+        Commit parent = Commit.getCommit(branches.get("HEAD"));
         Commit newCommit = new Commit(message, sha1(serialize(parent)));
         // inherit its parent's blobs
         newCommit.blobs.putAll(parent.blobs);
@@ -114,9 +119,11 @@ public class Repository {
         stagingArea.blobsForRemoval.clear();
         writeObject(stagingAreaText, stagingArea);
         // add the commit to the commit tree, change the pointers
-        commitTree.put(sha1(serialize(newCommit)), newCommit);
-        branches.put("HEAD", newCommit);
-        branches.put("master", newCommit);
+        commitTree.add(sha1(serialize(newCommit)));
+        branches.put("HEAD", sha1(serialize(newCommit)));
+        branches.put("master", sha1(serialize(newCommit)));
+        // set persistence
+        newCommit.saveCommit();
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
     }
@@ -128,7 +135,7 @@ public class Repository {
     public static void rm(String filename) {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         branches = readObject(branchesText, HashMap.class);
-        Commit head = branches.get("HEAD");
+        Commit head = Commit.getCommit(branches.get("HEAD"));
         // failure cases
         if (!stagingArea.blobsForAddition.containsKey(filename) &&
                 !head.blobs.containsKey(filename)) {
@@ -151,16 +158,15 @@ public class Repository {
      * parent commit links, ignoring any second parents found in merge commits.*/
     public static void log() {
         branches = readObject(branchesText, HashMap.class);
-        commitTree = readObject(commitTreeText, HashMap.class);
-        Commit head = branches.get("HEAD");
-        Commit current= head;
+        commitTree = readObject(commitTreeText, HashSet.class);
+        Commit current = Commit.getCommit(branches.get("HEAD"));
         Formatter formatter = new Formatter();
         while (!current.getParent().isEmpty()) {
             System.out.println("===");
             System.out.println("commit " + sha1(serialize(current)));
             formatter.format("Date: %tc", current.getTimestamp());
             System.out.println(current.getMessage());
-            current = commitTree.get(current.getParent());
+            current = Commit.getCommit(current.getParent());
             System.out.println();
         }
         // need to handle merge commits
