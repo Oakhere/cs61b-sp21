@@ -32,6 +32,7 @@ public class Repository {
     /** Every time we make a new commit, add it to the commit tree, mapping its SHA1
      * to the commit object. */
     public static HashMap<String, Commit> commitTree;
+    public static StagingArea stagingArea;
 
     /** A file to store the commit tree to disk. */
     public static final File commitTreeText = join(GITLET_DIR, "commitTree.txt");
@@ -43,7 +44,7 @@ public class Repository {
         commitTreeText.createNewFile();
         branchesText.createNewFile();
         stagingAreaText.createNewFile();
-        StagingArea stagingArea = new StagingArea();
+        stagingArea = new StagingArea();
         writeObject(stagingAreaText, stagingArea);
     }
 
@@ -77,12 +78,25 @@ public class Repository {
             message("File does not exist.");
             System.exit(0);
         }
-        StagingArea stagingArea = readObject(stagingAreaText, StagingArea.class);
+        stagingArea = readObject(stagingAreaText, StagingArea.class);
         stagingArea.add(f);
         writeObject(stagingAreaText, stagingArea);
     }
 
+    /** Saves a snapshot of tracked files in the current commit and staging area so
+     * that they can be restored at a later time, creating a new commit.*/
     public static void commit(String message) {
+        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        // failure cases
+        if (stagingArea.blobsForAddition.isEmpty()) {
+            message("No changes added to the commit.");
+            System.exit(0);
+        }
+        if (message.isEmpty()) {
+            message("Please enter a commit message.");
+            System.exit(0);
+        }
+
         commitTree = readObject(commitTreeText, HashMap.class);
         branches = readObject(branchesText, HashMap.class);
         Commit parent = branches.get("HEAD");
@@ -90,10 +104,13 @@ public class Repository {
         // inherit its parent's blobs
         newCommit.blobs.putAll(parent.blobs);
         // update the file in the staging area to the commit
-        StagingArea stagingArea = readObject(stagingAreaText, StagingArea.class);
         newCommit.blobs.putAll(stagingArea.blobsForAddition);
+        for (String f : stagingArea.blobsForRemoval) {
+            newCommit.blobs.remove(f);
+        }
         // clear the staging area
         stagingArea.blobsForAddition.clear();
+        stagingArea.blobsForRemoval.clear();
         writeObject(stagingAreaText, stagingArea);
         // add the commit to the commit tree, change the pointers
         commitTree.put(sha1(serialize(newCommit)), newCommit);
@@ -101,5 +118,29 @@ public class Repository {
         branches.put("master", newCommit);
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
+    }
+
+    /** Unstage the file if it is currently staged for addition. If the file is
+     * tracked in the current commit, stage it for removal and remove the file from
+     * the working directory if the user has not already done so (do not remove it
+     * unless it is tracked in the current commit).*/
+    public static void rm(String filename) {
+        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        branches = readObject(branchesText, HashMap.class);
+        Commit head = branches.get("HEAD");
+        // failure cases
+        if (!stagingArea.blobsForAddition.containsKey(filename) &&
+                !head.blobs.containsKey(filename)) {
+            message("No reason to remove the file.");
+            System.exit(0);
+        }
+        // make sure the file is no longer staged for addition
+        stagingArea.blobsForAddition.remove(filename);
+        // if the file is tracked in the current commit, stage it for removal and
+        // remove the file from the working directory if the user has not already done so
+        if (head.blobs.containsKey(filename)) {
+            restrictedDelete(filename);
+            stagingArea.blobsForRemoval.add(filename);
+        }
     }
 }

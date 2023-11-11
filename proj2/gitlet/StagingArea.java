@@ -11,11 +11,12 @@ import static gitlet.Utils.*;
 public class StagingArea implements Serializable {
     /** Mapping file name -> SHA-1 code of the blob. */
     HashMap<String, String> blobsForAddition;
-    HashMap<String,String> blobsForRemoval;
+    /** Contains the filenames of the files which should be removed. */
+    HashSet<String> blobsForRemoval;
 
     public StagingArea() {
         this.blobsForAddition = new HashMap<>();
-        this.blobsForRemoval = new HashMap<>();
+        this.blobsForRemoval = new HashSet<>();
     }
 
     /** Save the file as a blob, and add the blob to the staging area. */

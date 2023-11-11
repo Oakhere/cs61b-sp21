@@ -17,20 +17,24 @@ public class Main {
             return;
         }
         String firstArg = args[0];
-        switch(firstArg) {
-            case "init":
+        switch (firstArg) {
+            case "init" ->
                 // TODO: handle the `init` command
-                Repository.init();
-                break;
-            case "add":
+                    Repository.init();
+            case "add" -> {
                 // TODO: handle the `add [filename]` command
                 String fileName = args[1];
                 Repository.add(fileName);
-                break;
+            }
             // TODO: FILL THE REST IN
-            case "commit":
+            case "commit" -> {
                 String message = args[1];
                 Repository.commit(message);
+            }
+            case "rm" -> {
+                String filename = args[1];
+                Repository.rm(filename);
+            }
         }
     }
 }
