@@ -12,10 +12,12 @@ public class Blob implements Serializable {
     File f;
     /** The actual contents in the file that the blob represents. */
     String contents;
+
     public Blob(File f) {
         this.f = f;
         this.contents = readContentsAsString(f);
     }
+
     /** Save the blob as a file in the disk with the file name being its SHA-1 code. */
     public void saveBlob() throws IOException {
         File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");

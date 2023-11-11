@@ -18,15 +18,11 @@ public class Main {
         }
         String firstArg = args[0];
         switch (firstArg) {
-            case "init" ->
-                // TODO: handle the `init` command
-                    Repository.init();
+            case "init" -> Repository.init();
             case "add" -> {
-                // TODO: handle the `add [filename]` command
                 String fileName = args[1];
                 Repository.add(fileName);
             }
-            // TODO: FILL THE REST IN
             case "commit" -> {
                 String message = args[1];
                 Repository.commit(message);
@@ -35,8 +31,16 @@ public class Main {
                 String filename = args[1];
                 Repository.rm(filename);
             }
-            case "log" -> {
-
+            case "log" -> Repository.log();
+            case "find" -> {
+                String message = args[1];
+                Repository.find(message);
+            }
+            case "global-log" -> Repository.globalLog();
+            case "status" -> Repository.status();
+            case "branch" -> {
+                String branchName = args[1];
+                Repository.branch(branchName);
             }
         }
     }

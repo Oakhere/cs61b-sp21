@@ -1,9 +1,7 @@
 package gitlet;
 
 import java.io.*;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -171,4 +169,98 @@ public class Repository {
         }
         // need to handle merge commits
     }
+
+    /** Like log, except displays information about all commits ever made.
+     * The order of the commits does not matter. */
+    public static void globalLog() {
+        commitTree = readObject(commitTreeText, HashSet.class);
+        Formatter formatter = new Formatter();
+        for (String sha1 : commitTree) {
+            Commit current = Commit.getCommit(sha1);
+            System.out.println("===");
+            System.out.println("commit " + sha1);
+            formatter.format("Date: %tc", current.getTimestamp());
+            System.out.println(current.getMessage());
+            current = Commit.getCommit(current.getParent());
+            System.out.println();
+        }
+    }
+
+    /**  Prints out the ids of all commits that have the given commit message. */
+    public static void find(String message) {
+        commitTree = readObject(commitTreeText, HashSet.class);
+        boolean commitFound = false;
+        for (String sha1 : commitTree) {
+            Commit current = Commit.getCommit(sha1);
+            if (current.getMessage().equals(message)) {
+                System.out.println(sha1);
+                commitFound = true;
+            }
+        }
+        if (!commitFound) {
+            message("Found no commit with that message.");
+            System.exit(0);
+        }
+    }
+
+    /** Displays what branches currently exist, and marks the current branch with a *.
+     * Also displays what files have been staged for addition or removal. */
+    public static void status() {
+        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        branches = readObject(branchesText, HashMap.class);
+        System.out.println("=== Branches ===");
+        String head = branches.get("HEAD");
+        List<String> keysList = new ArrayList<>(branches.keySet());
+        Collections.sort(keysList);
+        for (String key : keysList) {
+            // skip the HEAD since it's just a pointer, not exactly a branch
+            if (!key.equals("HEAD")) {
+                continue;
+            }
+            // the current branch gets an extra *
+            if (branches.get(key).equals(head)) {
+                System.out.println("*" + key);
+            } else {
+                System.out.println(key);
+            }
+        }
+        System.out.println();
+        System.out.println("=== Staged Files ===");
+        List<String> addList = new ArrayList<>(stagingArea.blobsForAddition.keySet());
+        Collections.sort(addList);
+        for (String f : addList) {
+            System.out.println(f);
+        }
+        System.out.println();
+        System.out.println("=== Removed Files ===");
+        List<String> removeList = new ArrayList<>(stagingArea.blobsForRemoval);
+        Collections.sort(removeList);
+        for (String f : removeList) {
+            System.out.println(f);
+        }
+        System.out.println();
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        // implement for extra credit
+        System.out.println();
+        System.out.println("=== Untracked Files ===");
+        // implement for extra credit
+        System.out.println();
+    }
+
+    /** Creates a new branch with the given name, and points it at the current head commit.
+     * Noted that a branch is nothing more than a name for a reference (a SHA-1 identifier) to
+     * a commit node. */
+    public static void branch(String branchName) {
+        branches = readObject(branchesText, HashMap.class);
+        // failure cases
+        if (branches.containsKey(branchName)) {
+            message("A branch with that name already exists.");
+            System.exit(0);
+        }
+        // find the current head commit, create a new branch and points it at the current head commit.
+        String head = branches.get("HEAD");
+        branches.put(branchName, head);
+    }
+
+
 }

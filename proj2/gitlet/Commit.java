@@ -6,11 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.Calendar;
 import java.util.HashMap;
 
 import static gitlet.Utils.*;
-import static gitlet.Utils.writeObject;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
