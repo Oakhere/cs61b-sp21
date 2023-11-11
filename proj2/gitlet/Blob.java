@@ -10,6 +10,7 @@ import static gitlet.Utils.*;
 public class Blob implements Serializable {
     /** The file that the blob represents. */
     File f;
+    /** The actual contents in the file that the blob represents. */
     String contents;
     public Blob(File f) {
         this.f = f;

@@ -9,7 +9,7 @@ import static gitlet.Utils.*;
 
 
 public class StagingArea implements Serializable {
-    /** Mapping file name to the SHA-1 code of the blob. */
+    /** Mapping file name -> SHA-1 code of the blob. */
     HashMap<String, String> blobsForAddition;
     HashMap<String,String> blobsForRemoval;
 

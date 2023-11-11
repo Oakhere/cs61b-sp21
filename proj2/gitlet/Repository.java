@@ -25,6 +25,14 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
+
+    /** A mapping from branch heads to references to commits, so that certain
+     * important commits have symbolic names.*/
+    public static HashMap<String, Commit> branches;
+    /** Every time we make a new commit, add it to the commit tree, mapping its SHA1
+     * to the commit object. */
+    public static HashMap<String, Commit> commitTree;
+
     /** A file to store the commit tree to disk. */
     public static final File commitTreeText = join(GITLET_DIR, "commitTree.txt");
     public static final File branchesText = join(GITLET_DIR, "branches.txt");
@@ -51,13 +59,8 @@ public class Repository {
             System.exit(0);
         }
         setUpPersistence();
-
-        /** Every time we make a new commit, add it to the commit tree, mapping its SHA1
-         * to the commit object. */
-        HashMap<String, Commit> commitTree = new HashMap<>();
-        /** A mapping from branch heads to references to commits, so that certain
-         * important commits have symbolic names.*/
-        HashMap<String, Commit> branches = new HashMap<>();
+        commitTree = new HashMap<>();
+        branches = new HashMap<>();
         Commit initial = new Commit("initial commit", "");
         commitTree.put(sha1(serialize(initial)), initial);
         branches.put("master", initial);
@@ -79,7 +82,24 @@ public class Repository {
         writeObject(stagingAreaText, stagingArea);
     }
 
-    public static void commit() {
-
+    public static void commit(String message) {
+        commitTree = readObject(commitTreeText, HashMap.class);
+        branches = readObject(branchesText, HashMap.class);
+        Commit parent = branches.get("HEAD");
+        Commit newCommit = new Commit(message, sha1(serialize(parent)));
+        // inherit its parent's blobs
+        newCommit.blobs.putAll(parent.blobs);
+        // update the file in the staging area to the commit
+        StagingArea stagingArea = readObject(stagingAreaText, StagingArea.class);
+        newCommit.blobs.putAll(stagingArea.blobsForAddition);
+        // clear the staging area
+        stagingArea.blobsForAddition.clear();
+        writeObject(stagingAreaText, stagingArea);
+        // add the commit to the commit tree, change the pointers
+        commitTree.put(sha1(serialize(newCommit)), newCommit);
+        branches.put("HEAD", newCommit);
+        branches.put("master", newCommit);
+        writeObject(commitTreeText, commitTree);
+        writeObject(branchesText, branches);
     }
 }

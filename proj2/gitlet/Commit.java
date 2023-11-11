@@ -27,14 +27,17 @@ public class Commit implements Serializable {
     /** The SHA-1 code of the parent of this Commit. */
     private String parent;
     /** A map: File name -> Blob SHA-1 */
-    private HashMap<String, String> blobs;
+    public HashMap<String, String> blobs;
 
     public Commit(String message, String parent) {
         this.message = message;
         this.parent = parent;
         if (this.parent.isEmpty()) {
             this.timestamp = new Date(0);
+        } else {
+            this.timestamp = new Date();
         }
+        this.blobs = new HashMap<>();
     }
 
 }
