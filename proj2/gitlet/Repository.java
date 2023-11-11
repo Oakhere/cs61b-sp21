@@ -142,5 +142,13 @@ public class Repository {
             restrictedDelete(filename);
             stagingArea.blobsForRemoval.add(filename);
         }
+        writeObject(stagingAreaText, stagingArea);
+    }
+
+    /**  Starting at the current head commit, display information about each commit
+     * backwards along the commit tree until the initial commit, following the first
+     * parent commit links, ignoring any second parents found in merge commits.*/
+    public static void log() {
+
     }
 }

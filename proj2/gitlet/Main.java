@@ -35,6 +35,9 @@ public class Main {
                 String filename = args[1];
                 Repository.rm(filename);
             }
+            case "log" -> {
+
+            }
         }
     }
 }
