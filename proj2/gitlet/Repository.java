@@ -92,7 +92,7 @@ public class Repository {
     public static void commit(String message) throws IOException {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         // failure cases
-        if (stagingArea.blobsForAddition.isEmpty()) {
+        if (stagingArea.blobsForAddition.isEmpty() && stagingArea.blobsForRemoval.isEmpty()) {
             message("No changes added to the commit.");
             System.exit(0);
         }
@@ -158,14 +158,9 @@ public class Repository {
         branches = readObject(branchesText, HashMap.class);
         commitTree = readObject(commitTreeText, HashSet.class);
         Commit current = Commit.getCommit(branches.get("HEAD"));
-        Formatter formatter = new Formatter();
-        while (!current.getParent().isEmpty()) {
-            System.out.println("===");
-            System.out.println("commit " + sha1(serialize(current)));
-            formatter.format("Date: %tc", current.getTimestamp());
-            System.out.println(current.getMessage());
+        while (current != null) {
+            current.printLog();
             current = Commit.getCommit(current.getParent());
-            System.out.println();
         }
         // need to handle merge commits
     }
@@ -174,15 +169,9 @@ public class Repository {
      * The order of the commits does not matter. */
     public static void globalLog() {
         commitTree = readObject(commitTreeText, HashSet.class);
-        Formatter formatter = new Formatter();
         for (String sha1 : commitTree) {
             Commit current = Commit.getCommit(sha1);
-            System.out.println("===");
-            System.out.println("commit " + sha1);
-            formatter.format("Date: %tc", current.getTimestamp());
-            System.out.println(current.getMessage());
-            current = Commit.getCommit(current.getParent());
-            System.out.println();
+            current.printLog();
         }
     }
 
@@ -214,7 +203,7 @@ public class Repository {
         Collections.sort(keysList);
         for (String key : keysList) {
             // skip the HEAD since it's just a pointer, not exactly a branch
-            if (!key.equals("HEAD")) {
+            if (key.equals("HEAD")) {
                 continue;
             }
             // the current branch gets an extra *

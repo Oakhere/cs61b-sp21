@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.Formatter;
 import java.util.HashMap;
 
 import static gitlet.Utils.*;
@@ -60,8 +61,24 @@ public class Commit implements Serializable {
     }
     /** Get the commit object from the disk using its SHA-1 code. */
     public static Commit getCommit(String sha1) {
+        // special case for trying to get the parent of the initial commit
+        if (sha1.isEmpty()) {
+            return null;
+        }
         File f = join(Repository.GITLET_DIR, sha1 + ".txt");
         return readObject(f, Commit.class);
+    }
+
+    /** A helper method for the command log and global-log. */
+    public void printLog() {
+        Formatter formatter = new Formatter();
+        System.out.println("===");
+        System.out.println("commit " + sha1(serialize(this)));
+        formatter.format("Date: %tc", timestamp);
+        System.out.println(formatter);
+        System.out.println(message);
+        System.out.println();
+        formatter.close();
     }
 
 }
