@@ -26,4 +26,10 @@ public class StagingArea implements Serializable {
         blobsForAddition.put(f.getName(), sha1(serialize(blob)));
     }
 
+    /** Clear the staging area. */
+    public void clear() {
+        this.blobsForAddition.clear();
+        this.blobsForRemoval.clear();
+    }
+
 }

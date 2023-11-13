@@ -24,4 +24,11 @@ public class Blob implements Serializable {
         f.createNewFile();
         writeObject(f, this);
     }
+
+    /** Get the blob object from the disk using its SHA-1 code. */
+    public static Blob getBlob(String sha1) {
+        File f = join(Repository.GITLET_DIR, sha1 + ".txt");
+        return readObject(f, Blob.class);
+    }
+
 }

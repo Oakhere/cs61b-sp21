@@ -38,6 +38,21 @@ public class Main {
             }
             case "global-log" -> Repository.globalLog();
             case "status" -> Repository.status();
+            case "checkout" -> {
+                if (args.length == 2) {
+                    String branchName = args[1];
+                    Repository.checkoutBranch(branchName);
+                } else if (args.length == 3 && args[1].equals("--")) {
+                    String fileName = args[2];
+                    Repository.checkoutFile(fileName);
+                } else if (args.length == 4 && args[2].equals("--")) {
+                    String commitID = args[1];
+                    String fileName = args[3];
+                    Repository.checkoutCommitFile(commitID, fileName);
+                } else {
+                    Utils.message("Invalid checkout command.");
+                }
+            }
             case "branch" -> {
                 String branchName = args[1];
                 Repository.branch(branchName);

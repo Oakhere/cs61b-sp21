@@ -113,8 +113,7 @@ public class Repository {
             newCommit.blobs.remove(f);
         }
         // clear the staging area
-        stagingArea.blobsForAddition.clear();
-        stagingArea.blobsForRemoval.clear();
+        stagingArea.clear();
         writeObject(stagingAreaText, stagingArea);
         // add the commit to the commit tree, change the pointers
         commitTree.add(sha1(serialize(newCommit)));
@@ -250,6 +249,106 @@ public class Repository {
         String head = branches.get("HEAD");
         branches.put(branchName, head);
     }
+
+    /** Takes the version of the file as it exists in the head commit and puts it in the working
+     * directory, overwriting the version of the file that’s already there if there is one.
+     * The new version of the file is not staged.*/
+    public static void checkoutFile(String fileName) throws IOException {
+        branches = readObject(branchesText, HashMap.class);
+        Commit head = Commit.getCommit(branches.get("HEAD"));
+        // failure cases
+        if (!head.blobs.containsKey(fileName)) {
+            message("File does not exist in that commit.");
+            System.exit(0);
+        }
+        // create or rewrite file
+        File localFile = join(CWD, fileName);
+        localFile.createNewFile();
+        writeContents(localFile, Blob.getBlob(head.blobs.get(fileName)).contents);
+    }
+    /** Takes the version of the file as it exists in the commit with the given id, and puts it
+     * in the working directory, overwriting the version of the file that’s already there if
+     * there is one. The new version of the file is not staged.*/
+    public static void checkoutCommitFile(String commitID, String fileName) throws IOException {
+        commitID = fullCommitID(commitID);
+        // if such id doesn't exit, fullCommitID returns an empty string
+        if (commitID.isEmpty()) {
+            message("No commit with that id exists.");
+            System.exit(0);
+        }
+        Commit givenCommit = Commit.getCommit(commitID);
+        if (!givenCommit.blobs.containsKey(fileName)) {
+            message("File does not exist in that commit.");
+            System.exit(0);
+        }
+        // create or rewrite file
+        File localFile = join(CWD, fileName);
+        localFile.createNewFile();
+        writeContents(localFile, Blob.getBlob(givenCommit.blobs.get(fileName)).contents);
+    }
+
+    /** A helper method for finding the full commit id using its prefix. If such id doesn't exist,
+     * return an empty string. */
+    private static String fullCommitID(String prefix) {
+        commitTree = readObject(commitTreeText, HashSet.class);
+        for (String id : commitTree) {
+            if (id.startsWith(prefix)) {
+                return id;
+            }
+        }
+        return "";
+    }
+    /** Takes all files in the commit at the head of the given branch, and puts them in the
+     * working directory, overwriting the versions of the files that are already there if they
+     * exist. Also, at the end of this command, the given branch will now be considered the
+     * current branch (HEAD). Any files that are tracked in the current branch but are not present
+     * in the checked-out branch are deleted. The staging area is cleared, unless the checked-out
+     * branch is the current branch(failure case). */
+    public static void checkoutBranch(String branchName) throws IOException {
+        branches = readObject(branchesText, HashMap.class);
+        // failure cases
+        if (!branches.containsKey(branchName)) {
+            message("No such branch exists.");
+            System.exit(0);
+        }
+        if (branches.get(branchName).equals(branches.get("HEAD"))) {
+            message("No need to checkout the current branch.");
+            System.exit(0);
+        }
+        Commit checkoutCommit = Commit.getCommit(branches.get(branchName));
+        Commit currentCommit = Commit.getCommit(branches.get("HEAD"));
+        Set<String> fileInCurrentCommit = currentCommit.blobs.keySet();
+        Set<String> fileInCheckoutCommit = checkoutCommit.blobs.keySet();
+        for (String f : fileInCheckoutCommit) {
+            File file = join(CWD, f);
+            if (file.exists() && !fileInCurrentCommit.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and " +
+                        "commit it first.");
+                System.exit(0);
+            }
+        }
+        // iterate through all the files tracked by the current commit. if they don't exist in
+        // the checkout commit, delete them.
+        for (String f : fileInCurrentCommit) {
+            if (!fileInCheckoutCommit.contains(f)) {
+                restrictedDelete(join(CWD, f));
+            }
+        }
+        // iterate through all the files tracked by the checkout commit, create or overwrite them
+        for (String f : fileInCheckoutCommit) {
+            File file = join(CWD, f);
+            file.createNewFile();
+            writeContents(file, Blob.getBlob(checkoutCommit.blobs.get(f)).contents);
+        }
+        // set the checkout branch as the current branch (HEAD)
+        branches.put("HEAD", sha1(serialize(checkoutCommit)));
+        writeObject(branchesText, branches);
+        // clear the staging area
+        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        stagingArea.clear();
+        writeObject(stagingAreaText, stagingArea);
+    }
+
 
 
 }
