@@ -366,8 +366,24 @@ public class Repository {
         writeObject(branchesText, branches);
     }
 
-    public static void reset(String commitID) {
-
+    /** Checks out all the files tracked by the given commit. Removes tracked files
+     * that are not present in that commit. Also moves the current branch’s head to
+     * that commit node. The staging area is cleared. */
+    public static void reset(String commitID) throws IOException {
+        branches = readObject(branchesText, HashMap.class);
+        commitID = fullCommitID(commitID);
+        if (commitID.isEmpty()) {
+            message("No commit with that id exists.");
+            System.exit(0);
+        }
+        // temporarily create a branch called "temp" in branches so that we can call the
+        // previous checkoutBranch method.
+        branches.put("temp", commitID);
+        checkoutBranch("temp");
+        branches.put("HEAD", commitID);
+        // remove the "temp" branch
+        branches.remove("temp");
+        writeObject(branchesText, branches);
     }
 
 
