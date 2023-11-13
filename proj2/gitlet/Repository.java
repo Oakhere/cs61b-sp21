@@ -28,7 +28,8 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /** A mapping from branch heads to references to commits(actually their SHA-1 code),
-     *  so that certain important commits have symbolic names.*/
+     *  so that certain important commits have symbolic names. Exception: "HEAD" maps to
+     *  the name of the current branch, e.g. "HEAD" -> "master". */
     public static HashMap<String, String> branches;
     /** Every time we make a new commit, add it's SHA-1 to the commit tree*/
     public static HashSet<String> commitTree;
@@ -68,7 +69,7 @@ public class Repository {
         commitTree.add(sha1(serialize(initial)));
         branches.put("master", sha1(serialize(initial)));
         // The HEAD pointer keeps track of where in the linked list we currently are.
-        branches.put("HEAD", sha1(serialize(initial)));
+        branches.put("HEAD", "master");
         // set persistence
         initial.saveCommit();
         writeObject(commitTreeText, commitTree);
@@ -103,7 +104,7 @@ public class Repository {
         // find the parent commit, create a new commit
         commitTree = readObject(commitTreeText, HashSet.class);
         branches = readObject(branchesText, HashMap.class);
-        Commit parent = Commit.getCommit(branches.get("HEAD"));
+        Commit parent = Commit.getCommit(branches.get(branches.get("HEAD")));
         Commit newCommit = new Commit(message, sha1(serialize(parent)));
         // inherit its parent's blobs
         newCommit.blobs.putAll(parent.blobs);
@@ -117,8 +118,7 @@ public class Repository {
         writeObject(stagingAreaText, stagingArea);
         // add the commit to the commit tree, change the pointers
         commitTree.add(sha1(serialize(newCommit)));
-        branches.put("HEAD", sha1(serialize(newCommit)));
-        branches.put("master", sha1(serialize(newCommit)));
+        branches.put(branches.get("HEAD"), sha1(serialize(newCommit)));
         // set persistence
         newCommit.saveCommit();
         writeObject(commitTreeText, commitTree);
@@ -132,7 +132,7 @@ public class Repository {
     public static void rm(String filename) {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         branches = readObject(branchesText, HashMap.class);
-        Commit head = Commit.getCommit(branches.get("HEAD"));
+        Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         // failure cases
         if (!stagingArea.blobsForAddition.containsKey(filename) &&
                 !head.blobs.containsKey(filename)) {
@@ -156,7 +156,7 @@ public class Repository {
     public static void log() {
         branches = readObject(branchesText, HashMap.class);
         commitTree = readObject(commitTreeText, HashSet.class);
-        Commit current = Commit.getCommit(branches.get("HEAD"));
+        Commit current = Commit.getCommit(branches.get(branches.get("HEAD")));
         while (current != null) {
             current.printLog();
             current = Commit.getCommit(current.getParent());
@@ -197,7 +197,6 @@ public class Repository {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         branches = readObject(branchesText, HashMap.class);
         System.out.println("=== Branches ===");
-        String head = branches.get("HEAD");
         List<String> keysList = new ArrayList<>(branches.keySet());
         Collections.sort(keysList);
         for (String key : keysList) {
@@ -206,7 +205,7 @@ public class Repository {
                 continue;
             }
             // the current branch gets an extra *
-            if (branches.get(key).equals(head)) {
+            if (key.equals(branches.get("HEAD"))) {
                 System.out.println("*" + key);
             } else {
                 System.out.println(key);
@@ -246,8 +245,9 @@ public class Repository {
             System.exit(0);
         }
         // find the current head commit, create a new branch and points it at the current head commit.
-        String head = branches.get("HEAD");
-        branches.put(branchName, head);
+        String headSha1 = branches.get(branches.get("HEAD"));
+        branches.put(branchName, headSha1);
+        writeObject(branchesText, branches);
     }
 
     /** Takes the version of the file as it exists in the head commit and puts it in the working
@@ -255,7 +255,7 @@ public class Repository {
      * The new version of the file is not staged.*/
     public static void checkoutFile(String fileName) throws IOException {
         branches = readObject(branchesText, HashMap.class);
-        Commit head = Commit.getCommit(branches.get("HEAD"));
+        Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         // failure cases
         if (!head.blobs.containsKey(fileName)) {
             message("File does not exist in that commit.");
@@ -311,22 +311,22 @@ public class Repository {
             message("No such branch exists.");
             System.exit(0);
         }
-        if (branches.get(branchName).equals(branches.get("HEAD"))) {
+        if (branchName.equals(branches.get("HEAD"))) {
             message("No need to checkout the current branch.");
             System.exit(0);
         }
         Commit checkoutCommit = Commit.getCommit(branches.get(branchName));
-        Commit currentCommit = Commit.getCommit(branches.get("HEAD"));
+        Commit currentCommit = Commit.getCommit(branches.get(branches.get("HEAD")));
         Set<String> fileInCurrentCommit = currentCommit.blobs.keySet();
         Set<String> fileInCheckoutCommit = checkoutCommit.blobs.keySet();
-        for (String f : fileInCheckoutCommit) {
-            File file = join(CWD, f);
-            if (file.exists() && !fileInCurrentCommit.contains(f)) {
+        for (String f : plainFilenamesIn(CWD)) {
+            if (!f.startsWith(".") && !fileInCurrentCommit.contains(f)) {
                 message("There is an untracked file in the way; delete it, or add and " +
                         "commit it first.");
                 System.exit(0);
             }
         }
+
         // iterate through all the files tracked by the current commit. if they don't exist in
         // the checkout commit, delete them.
         for (String f : fileInCurrentCommit) {
@@ -341,7 +341,7 @@ public class Repository {
             writeContents(file, Blob.getBlob(checkoutCommit.blobs.get(f)).contents);
         }
         // set the checkout branch as the current branch (HEAD)
-        branches.put("HEAD", sha1(serialize(checkoutCommit)));
+        branches.put("HEAD", branchName);
         writeObject(branchesText, branches);
         // clear the staging area
         stagingArea = readObject(stagingAreaText, StagingArea.class);
@@ -357,7 +357,7 @@ public class Repository {
             message("A branch with that name does not exist.");
             System.exit(0);
         }
-        if (branches.get("HEAD").equals(branches.get(branchName))) {
+        if (branches.get("HEAD").equals(branchName)) {
             message("Cannot remove the current branch.");
             System.exit(0);
         }
