@@ -57,6 +57,14 @@ public class Main {
                 String branchName = args[1];
                 Repository.branch(branchName);
             }
+            case "rm-branch" -> {
+                String branchName = args[1];
+                Repository.removeBranch(branchName);
+            }
+            case "reset" -> {
+                String commitID = args[1];
+                Repository.reset(commitID);
+            }
         }
     }
 }

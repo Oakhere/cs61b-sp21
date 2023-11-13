@@ -349,6 +349,28 @@ public class Repository {
         writeObject(stagingAreaText, stagingArea);
     }
 
+    /** Deletes the branch(pointer) with the given name.*/
+    public static void removeBranch(String branchName) {
+        branches = readObject(branchesText, HashMap.class);
+        // failure cases
+        if (!branches.containsKey(branchName)) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branches.get("HEAD").equals(branches.get(branchName))) {
+            message("Cannot remove the current branch.");
+            System.exit(0);
+        }
+        // remove the branch name
+        branches.remove(branchName);
+        writeObject(branchesText, branches);
+    }
+
+    public static void reset(String commitID) {
+
+    }
+
+
 
 
 }
