@@ -3,7 +3,6 @@ package gitlet;
 // TODO: any imports you need here
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
 import java.util.Formatter;
