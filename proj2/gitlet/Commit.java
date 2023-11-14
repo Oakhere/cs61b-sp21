@@ -73,7 +73,7 @@ public class Commit implements Serializable {
         Formatter formatter = new Formatter();
         System.out.println("===");
         System.out.println("commit " + sha1(serialize(this)));
-        formatter.format("Date: %tc", timestamp);
+        formatter.format("Date: %ta %<tb %<td %<tT %<tY %tz", timestamp, timestamp);
         System.out.println(formatter);
         System.out.println(message);
         System.out.println();
