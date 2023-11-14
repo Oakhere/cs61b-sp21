@@ -54,9 +54,9 @@ public class Commit implements Serializable {
         return message;
     }
     /** Save the commit as a file in the disk with the file name being its SHA-1 code. */
-    public void saveCommit() throws IOException {
+    public void saveCommit() {
         File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
-        f.createNewFile();
+        //f.createNewFile();
         writeObject(f, this);
     }
     /** Get the commit object from the disk using its SHA-1 code. */

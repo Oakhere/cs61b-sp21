@@ -20,7 +20,7 @@ public class StagingArea implements Serializable {
     }
 
     /** Save the file as a blob, and add the blob to the staging area. */
-    public void add(File f) throws IOException {
+    public void add(File f) {
         Blob blob = new Blob(f);
         blob.saveBlob();
         blobsForAddition.put(f.getName(), sha1(serialize(blob)));

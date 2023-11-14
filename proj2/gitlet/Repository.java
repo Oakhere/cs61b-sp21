@@ -40,11 +40,11 @@ public class Repository {
     public static final File branchesText = join(GITLET_DIR, "branches.txt");
     public static final File stagingAreaText = join(GITLET_DIR, "stagingArea.txt");
 
-    private static void setUpPersistence() throws IOException {
+    private static void setUpPersistence() {
         GITLET_DIR.mkdir();
-        commitTreeText.createNewFile();
-        branchesText.createNewFile();
-        stagingAreaText.createNewFile();
+        //commitTreeText.createNewFile();
+        //branchesText.createNewFile();
+        //stagingAreaText.createNewFile();
         stagingArea = new StagingArea();
         writeObject(stagingAreaText, stagingArea);
     }
@@ -54,7 +54,7 @@ public class Repository {
      * no files and has the commit message initial commit. It will have a single
      * branch: master, which initially points to this initial commit, and master
      * will be the current branch. */
-    public static void init() throws IOException {
+    public static void init() {
         // failure cases
         if (GITLET_DIR.exists()) {
             message("A Gitlet version-control system already " +
@@ -77,7 +77,7 @@ public class Repository {
     }
 
     /** Adds a copy of the file as it currently exists to the staging area. */
-    public static void add(String fileName) throws IOException {
+    public static void add(String fileName) {
         File f = join(CWD, fileName);
         if (!f.exists()) {
             message("File does not exist.");
@@ -90,7 +90,7 @@ public class Repository {
 
     /** Saves a snapshot of tracked files in the current commit and staging area so
      * that they can be restored at a later time, creating a new commit.*/
-    public static void commit(String message) throws IOException {
+    public static void commit(String message) {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         // failure cases
         if (stagingArea.blobsForAddition.isEmpty() && stagingArea.blobsForRemoval.isEmpty()) {
@@ -253,7 +253,7 @@ public class Repository {
     /** Takes the version of the file as it exists in the head commit and puts it in the working
      * directory, overwriting the version of the file that’s already there if there is one.
      * The new version of the file is not staged.*/
-    public static void checkoutFile(String fileName) throws IOException {
+    public static void checkoutFile(String fileName) {
         branches = readObject(branchesText, HashMap.class);
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         // failure cases
@@ -263,13 +263,13 @@ public class Repository {
         }
         // create or rewrite file
         File localFile = join(CWD, fileName);
-        localFile.createNewFile();
+        //localFile.createNewFile();
         writeContents(localFile, Blob.getBlob(head.blobs.get(fileName)).contents);
     }
     /** Takes the version of the file as it exists in the commit with the given id, and puts it
      * in the working directory, overwriting the version of the file that’s already there if
      * there is one. The new version of the file is not staged.*/
-    public static void checkoutCommitFile(String commitID, String fileName) throws IOException {
+    public static void checkoutCommitFile(String commitID, String fileName) {
         commitID = fullCommitID(commitID);
         // if such id doesn't exit, fullCommitID returns an empty string
         if (commitID.isEmpty()) {
@@ -283,7 +283,7 @@ public class Repository {
         }
         // create or rewrite file
         File localFile = join(CWD, fileName);
-        localFile.createNewFile();
+        //localFile.createNewFile();
         writeContents(localFile, Blob.getBlob(givenCommit.blobs.get(fileName)).contents);
     }
 
@@ -304,7 +304,7 @@ public class Repository {
      * current branch (HEAD). Any files that are tracked in the current branch but are not present
      * in the checked-out branch are deleted. The staging area is cleared, unless the checked-out
      * branch is the current branch(failure case). */
-    public static void checkoutBranch(String branchName) throws IOException {
+    public static void checkoutBranch(String branchName) {
         branches = readObject(branchesText, HashMap.class);
         // failure cases
         if (!branches.containsKey(branchName)) {
@@ -337,7 +337,7 @@ public class Repository {
         // iterate through all the files tracked by the checkout commit, create or overwrite them
         for (String f : fileInCheckoutCommit) {
             File file = join(CWD, f);
-            file.createNewFile();
+            //file.createNewFile();
             writeContents(file, Blob.getBlob(checkoutCommit.blobs.get(f)).contents);
         }
         // set the checkout branch as the current branch (HEAD)
@@ -369,7 +369,7 @@ public class Repository {
     /** Checks out all the files tracked by the given commit. Removes tracked files
      * that are not present in that commit. Also moves the current branch’s head to
      * that commit node. The staging area is cleared. */
-    public static void reset(String commitID) throws IOException {
+    public static void reset(String commitID) {
         branches = readObject(branchesText, HashMap.class);
         commitID = fullCommitID(commitID);
         if (commitID.isEmpty()) {
