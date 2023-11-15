@@ -29,6 +29,7 @@ public class Commit implements Serializable {
     private Date timestamp;
     /** The SHA-1 code of the parent of this Commit. */
     private String parent;
+    private String sha1;
     /** A map: File name -> Blob SHA-1 */
     public HashMap<String, String> blobs;
 
@@ -41,21 +42,20 @@ public class Commit implements Serializable {
             this.timestamp = new Date();
         }
         this.blobs = new HashMap<>();
+        this.sha1 = "";
     }
 
     public String getParent() {
         return this.parent;
     }
-    public Date getTimestamp() {
-        return timestamp;
-    }
     public String getMessage() {
         return message;
     }
+
     /** Save the commit as a file in the disk with the file name being its SHA-1 code. */
-    public void saveCommit() {
-        File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
-        //f.createNewFile();
+    public void saveCommit(String sha1) {
+        this.sha1 = sha1;
+        File f = join(Repository.GITLET_DIR, sha1 + ".txt");
         writeObject(f, this);
     }
     /** Get the commit object from the disk using its SHA-1 code. */
@@ -72,7 +72,7 @@ public class Commit implements Serializable {
     public void printLog() {
         Formatter formatter = new Formatter();
         System.out.println("===");
-        System.out.println("commit " + sha1(serialize(this)));
+        System.out.println("commit " + sha1);
         formatter.format("Date: %ta %<tb %<td %<tT %<tY %tz", timestamp, timestamp);
         System.out.println(formatter);
         System.out.println(message);

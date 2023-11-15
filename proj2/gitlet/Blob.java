@@ -20,7 +20,6 @@ public class Blob implements Serializable {
     /** Save the blob as a file in the disk with the file name being its SHA-1 code. */
     public void saveBlob() {
         File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
-        //f.createNewFile();
         writeObject(f, this);
     }
 

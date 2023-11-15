@@ -42,9 +42,6 @@ public class Repository {
 
     private static void setUpPersistence() {
         GITLET_DIR.mkdir();
-        //commitTreeText.createNewFile();
-        //branchesText.createNewFile();
-        //stagingAreaText.createNewFile();
         stagingArea = new StagingArea();
         writeObject(stagingAreaText, stagingArea);
     }
@@ -66,12 +63,13 @@ public class Repository {
         commitTree = new HashSet<>();
         branches = new HashMap<>();
         Commit initial = new Commit("initial commit", "");
-        commitTree.add(sha1(serialize(initial)));
-        branches.put("master", sha1(serialize(initial)));
+        String initialSha1 = sha1(serialize(initial));
+        commitTree.add(initialSha1);
+        branches.put("master", initialSha1);
         // The HEAD pointer keeps track of where in the linked list we currently are.
         branches.put("HEAD", "master");
         // set persistence
-        initial.saveCommit();
+        initial.saveCommit(initialSha1);
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
     }
@@ -105,7 +103,7 @@ public class Repository {
         commitTree = readObject(commitTreeText, HashSet.class);
         branches = readObject(branchesText, HashMap.class);
         Commit parent = Commit.getCommit(branches.get(branches.get("HEAD")));
-        Commit newCommit = new Commit(message, sha1(serialize(parent)));
+        Commit newCommit = new Commit(message, branches.get(branches.get("HEAD")));
         // inherit its parent's blobs
         newCommit.blobs.putAll(parent.blobs);
         // update the file in the staging area to the commit
@@ -117,10 +115,11 @@ public class Repository {
         stagingArea.clear();
         writeObject(stagingAreaText, stagingArea);
         // add the commit to the commit tree, change the pointers
-        commitTree.add(sha1(serialize(newCommit)));
-        branches.put(branches.get("HEAD"), sha1(serialize(newCommit)));
+        String newCommitSha1 = sha1(serialize(newCommit));
+        commitTree.add(newCommitSha1);
+        branches.put(branches.get("HEAD"), newCommitSha1);
         // set persistence
-        newCommit.saveCommit();
+        newCommit.saveCommit(newCommitSha1);
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
     }
@@ -263,7 +262,6 @@ public class Repository {
         }
         // create or rewrite file
         File localFile = join(CWD, fileName);
-        //localFile.createNewFile();
         writeContents(localFile, Blob.getBlob(head.blobs.get(fileName)).contents);
     }
     /** Takes the version of the file as it exists in the commit with the given id, and puts it
@@ -283,7 +281,6 @@ public class Repository {
         }
         // create or rewrite file
         File localFile = join(CWD, fileName);
-        //localFile.createNewFile();
         writeContents(localFile, Blob.getBlob(givenCommit.blobs.get(fileName)).contents);
     }
 
@@ -337,7 +334,6 @@ public class Repository {
         // iterate through all the files tracked by the checkout commit, create or overwrite them
         for (String f : fileInCheckoutCommit) {
             File file = join(CWD, f);
-            //file.createNewFile();
             writeContents(file, Blob.getBlob(checkoutCommit.blobs.get(f)).contents);
         }
         // set the checkout branch as the current branch (HEAD)
