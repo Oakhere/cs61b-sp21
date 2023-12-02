@@ -390,7 +390,7 @@ public class Repository {
     public static void reset(String commitID) {
         branches = readObject(branchesText, HashMap.class);
         String fullCommitID = fullCommitID(commitID);
-        if (commitID.isEmpty()) {
+        if (fullCommitID.isEmpty()) {
             message("No commit with that id exists.");
             System.exit(0);
         }
