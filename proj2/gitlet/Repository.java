@@ -88,7 +88,7 @@ public class Repository {
 
     /** Saves a snapshot of tracked files in the current commit and staging area so
      * that they can be restored at a later time, creating a new commit.*/
-    public static void commit(String message) {
+    public static void commit(String message, String secondParent) {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         // failure cases
         if (stagingArea.isEmpty()) {
@@ -103,7 +103,12 @@ public class Repository {
         commitTree = readObject(commitTreeText, HashSet.class);
         branches = readObject(branchesText, HashMap.class);
         Commit parent = Commit.getCommit(branches.get(branches.get("HEAD")));
-        Commit newCommit = new Commit(message, branches.get(branches.get("HEAD")));
+        Commit newCommit;
+        if (secondParent.isEmpty()) {
+            newCommit = new Commit(message, branches.get(branches.get("HEAD")));
+        } else {
+            newCommit = new Commit(message, branches.get(branches.get("HEAD")), secondParent);
+        }
         // inherit its parent's blobs
         newCommit.blobs.putAll(parent.blobs);
         // update the file in the staging area to the commit
@@ -122,6 +127,11 @@ public class Repository {
         newCommit.saveCommit(newCommitSha1);
         writeObject(commitTreeText, commitTree);
         writeObject(branchesText, branches);
+    }
+
+    public static void commit(String message) {
+        String secondParent = "";
+        commit(message, secondParent);
     }
 
     /** Unstage the file if it is currently staged for addition. If the file is
@@ -482,7 +492,7 @@ public class Repository {
                 add(f);
             }
         }
-        commit(String.format("Merged %s into %s.", branchName, branches.get("HEAD")));
+        commit(String.format("Merged %s into %s.", branchName, branches.get("HEAD")), other.getSha1());
         if (conflictEncountered) {
             System.out.println("Encountered a merge conflict.");
         }
@@ -503,5 +513,9 @@ public class Repository {
             parentOfHead = Commit.getCommit(parentOfHead.getParent());
         }
         return null;
+    }
+
+    private static void mergeCommit(String message) {
+
     }
 }

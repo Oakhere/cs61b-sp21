@@ -20,6 +20,11 @@ public class StagingArea implements Serializable {
 
     /** Save the file as a blob, and add the blob to the staging area. */
     public void add(File f) {
+        // if the file has been staged for removal, adding it back means to unstage it
+        if (blobsForRemoval.contains(f.getName())) {
+            blobsForRemoval.remove(f.getName());
+            return;
+        }
         Blob blob = new Blob(f);
         blob.saveBlob();
         blobsForAddition.put(f.getName(), sha1(serialize(blob)));

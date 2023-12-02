@@ -29,6 +29,7 @@ public class Commit implements Serializable {
     private Date timestamp;
     /** The SHA-1 code of the parent of this Commit. */
     private String parent;
+    private String secondParent;
     private String sha1;
     /** A map: File name -> Blob SHA-1 */
     public HashMap<String, String> blobs;
@@ -36,6 +37,7 @@ public class Commit implements Serializable {
     public Commit(String message, String parent) {
         this.message = message;
         this.parent = parent;
+        this.secondParent = "";
         if (this.parent.isEmpty()) {
             this.timestamp = new Date(0);
         } else {
@@ -45,8 +47,21 @@ public class Commit implements Serializable {
         this.sha1 = "";
     }
 
+    /** A special constructor for merge commits. */
+    public Commit(String message, String parent, String secondParent) {
+        this.message = message;
+        this.parent = parent;
+        this.secondParent = secondParent;
+        this.timestamp = new Date();
+        this.blobs = new HashMap<>();
+        this.sha1 = "";
+    }
+
     public String getParent() {
         return this.parent;
+    }
+    public String getSecondParent() {
+        return this.secondParent;
     }
     public String getMessage() {
         return message;
@@ -76,6 +91,11 @@ public class Commit implements Serializable {
         Formatter formatter = new Formatter();
         System.out.println("===");
         System.out.println("commit " + sha1);
+        // merge commits have an extra line of information
+        if (!secondParent.isEmpty()) {
+            System.out.println(String.format("Merge: %s %s", parent.substring(0, 6),
+                    secondParent.substring(0, 6)));
+        }
         formatter.format("Date: %ta %<tb %<td %<tT %<tY %tz", timestamp, timestamp);
         System.out.println(formatter);
         System.out.println(message);
