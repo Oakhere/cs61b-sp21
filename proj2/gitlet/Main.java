@@ -15,6 +15,10 @@ public class Main {
             return;
         }
         String firstArg = args[0];
+        if (!firstArg.equals("init") && !Repository.GITLET_DIR.exists()) {
+            Utils.message("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
         switch (firstArg) {
             case "init" -> Repository.init();
             case "add" -> {
@@ -48,7 +52,7 @@ public class Main {
                     String fileName = args[3];
                     Repository.checkoutCommitFile(commitID, fileName);
                 } else {
-                    Utils.message("Invalid checkout command.");
+                    Utils.message("Incorrect operands.");
                 }
             }
             case "branch" -> {
@@ -67,6 +71,7 @@ public class Main {
                 String branchName = args[1];
                 Repository.merge(branchName);
             }
+            default -> Utils.message("No command with that name exists.");
         }
     }
 }

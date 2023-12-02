@@ -346,7 +346,6 @@ public class Repository {
                 System.exit(0);
             }
         }
-
         // iterate through all the files tracked by the current commit. if they don't exist in
         // the checkout commit, delete them.
         for (String f : fileInCurrentCommit) {
@@ -390,19 +389,21 @@ public class Repository {
      * that commit node. The staging area is cleared. */
     public static void reset(String commitID) {
         branches = readObject(branchesText, HashMap.class);
-        commitID = fullCommitID(commitID);
+        String fullCommitID = fullCommitID(commitID);
         if (commitID.isEmpty()) {
             message("No commit with that id exists.");
             System.exit(0);
         }
         // temporarily create a branch called "temp" in branches so that we can call the
         // previous checkoutBranch method.
-        branches.put("temp", commitID);
-        checkoutBranch("temp");
-        branches.put("HEAD", commitID);
-        // remove the "temp" branch
-        branches.remove("temp");
+        branches.put(commitID, fullCommitID);
+        //branches.put("temp", commitID);
         writeObject(branchesText, branches);
+        checkoutBranch(commitID);
+        //branches.put("HEAD", commitID);
+        // remove the "temp" branch
+        //branches.remove("temp");
+        //writeObject(branchesText, branches);
     }
 
     /** Merges files from the given branch("other") into the current branch("head"). */
@@ -498,8 +499,8 @@ public class Repository {
                 } else {
                     contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
                 }
-                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n" +
-                        contentInOther + ">>>>>>>";
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "\n=======\n" +
+                        contentInOther + "\n>>>>>>>";
                 writeContents(conflictFile, updatedContent);
                 add(f);
             }
