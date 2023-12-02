@@ -77,11 +77,23 @@ public class Repository {
     /** Adds a copy of the file as it currently exists to the staging area. */
     public static void add(String fileName) {
         File f = join(CWD, fileName);
+        String filename = f.getName();
         if (!f.exists()) {
             message("File does not exist.");
             System.exit(0);
         }
         stagingArea = readObject(stagingAreaText, StagingArea.class);
+        branches = readObject(branchesText, HashMap.class);
+
+        // adding a tracked, unchanged file has no effect.
+        Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
+        if (head.blobs.containsKey(filename) && !stagingArea.blobsForRemoval.contains(filename)) {
+            Blob b = Blob.getBlob(head.blobs.get(f.getName()));
+            if (b.contents.equals(readContentsAsString(f))) {
+                return;
+            }
+        }
+
         stagingArea.add(f);
         writeObject(stagingAreaText, stagingArea);
     }
