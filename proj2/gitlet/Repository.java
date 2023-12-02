@@ -317,7 +317,8 @@ public class Repository {
         Set<String> fileInCurrentCommit = currentCommit.blobs.keySet();
         Set<String> fileInCheckoutCommit = checkoutCommit.blobs.keySet();
         for (String f : plainFilenamesIn(CWD)) {
-            if (!f.startsWith(".") && !fileInCurrentCommit.contains(f)) {
+            if (!f.startsWith(".") && !fileInCurrentCommit.contains(f) &&
+                    fileInCheckoutCommit.contains(f)) {
                 message("There is an untracked file in the way; delete it, or add and " +
                         "commit it first.");
                 System.exit(0);
