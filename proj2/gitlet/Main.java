@@ -63,6 +63,10 @@ public class Main {
                 String commitID = args[1];
                 Repository.reset(commitID);
             }
+            case "merge" -> {
+                String branchName = args[1];
+                Repository.merge(branchName);
+            }
         }
     }
 }

@@ -91,7 +91,7 @@ public class Repository {
     public static void commit(String message) {
         stagingArea = readObject(stagingAreaText, StagingArea.class);
         // failure cases
-        if (stagingArea.blobsForAddition.isEmpty() && stagingArea.blobsForRemoval.isEmpty()) {
+        if (stagingArea.isEmpty()) {
             message("No changes added to the commit.");
             System.exit(0);
         }
@@ -382,7 +382,125 @@ public class Repository {
         writeObject(branchesText, branches);
     }
 
+    /** Merges files from the given branch("other") into the current branch("head"). */
+    public static void merge(String branchName) {
+        boolean conflictEncountered = false;
+        StagingArea stagingArea = readObject(stagingAreaText, StagingArea.class);
+        // failure case 1
+        if (!stagingArea.isEmpty()) {
+            message("You have uncommitted changes.");
+            System.exit(0);
+        }
 
+        branches = readObject(branchesText, HashMap.class);
+        // failure case 2
+        if (!branches.containsKey(branchName)) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        // failure case 3
+        if (branches.get("HEAD").equals(branchName)) {
+            message("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
 
+        Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
+        Commit other = Commit.getCommit(branches.get(branchName));
+        // failure case 4
+        Set<String> fileInHead = head.blobs.keySet();
+        Set<String> fileInOther = other.blobs.keySet();
+        for (String f : plainFilenamesIn(CWD)) {
+            // If an untracked file in the current commit would be overwritten or deleted by merge
+            if (!f.startsWith(".") && !fileInHead.contains(f) &&
+                    fileInOther.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and " +
+                        "commit it first.");
+                System.exit(0);
+            }
+        }
 
+        Commit split = findSplitPoint(head, other);
+        if (split == other) {
+            message("Given branch is an ancestor of the current branch.");
+            return;
+        }
+        if (split == head) {
+            checkoutBranch(branchName);
+            message("Current branch fast-forwarded.");
+            return;
+        }
+
+        // real merge happens:
+        // put all file names(whether in split point, current branch or given branch) into this set
+        HashSet<String> allFiles = new HashSet<>();
+        allFiles.addAll(split.blobs.keySet());
+        allFiles.addAll(head.blobs.keySet());
+        allFiles.addAll(other.blobs.keySet());
+        // iterate through all the files, perform different operations accordingly
+        for (String f : allFiles) {
+            // since blobs are content-addressable, use SHA-1 to determine whether they're modified
+            String inHead = head.blobs.get(f);
+            String inOther = other.blobs.get(f);
+            String inSplit = split.blobs.get(f);
+            if (inHead == null) {
+                inHead = "";
+            }
+            if (inOther == null) {
+                inOther = "";
+            }
+            if (inSplit == null) {
+                inSplit = "";
+            }
+
+            // modified in other but not in HEAD
+            if (!inOther.equals(inSplit) && inHead.equals(inSplit)) {
+                if (inOther.isEmpty()) {
+                    rm(f);
+                } else {
+                    checkoutCommitFile(other.getSha1(), f);
+                    add(f);
+                }
+                // modified in both other and in HEAD, and in different ways
+            } else if (!inOther.equals(inSplit) && !inOther.equals(inHead)) {
+                conflictEncountered = true;
+                File conflictFile = join(CWD, f);
+                String contentInHead, contentInOther;
+                if (inHead.isEmpty()) {
+                    contentInHead = "";
+                } else {
+                    contentInHead = Blob.getBlob(head.blobs.get(f)).contents;
+                }
+                if (inOther.isEmpty()) {
+                    contentInOther = "";
+                } else {
+                    contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
+                }
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======" +
+                        contentInOther + ">>>>>>>";
+                writeContents(conflictFile, updatedContent);
+                add(f);
+            }
+        }
+        commit(String.format("Merged %s into %s.", branchName, branches.get("HEAD")));
+        if (conflictEncountered) {
+            System.out.println("Encountered a merge conflict.");
+        }
+    }
+
+    /** A helper method that finds the split point of the current branch
+     * and the given branch. */
+    public static Commit findSplitPoint(Commit head, Commit other) {
+        Commit parentOfHead = head;
+        while (parentOfHead != null) {
+            Commit parentOfOther = other;
+            while (parentOfOther != null) {
+                if (parentOfHead == parentOfOther) {
+                    return parentOfHead;
+                }
+                parentOfOther = Commit.getCommit(parentOfOther.getParent());
+            }
+            parentOfHead = Commit.getCommit(parentOfHead.getParent());
+        }
+        return null;
+    }
 }

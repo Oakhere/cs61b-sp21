@@ -51,6 +51,9 @@ public class Commit implements Serializable {
     public String getMessage() {
         return message;
     }
+    public String getSha1() {
+        return sha1;
+    }
 
     /** Save the commit as a file in the disk with the file name being its SHA-1 code. */
     public void saveCommit(String sha1) {
@@ -79,5 +82,4 @@ public class Commit implements Serializable {
         System.out.println();
         formatter.close();
     }
-
 }

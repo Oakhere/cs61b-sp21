@@ -31,4 +31,9 @@ public class StagingArea implements Serializable {
         this.blobsForRemoval.clear();
     }
 
+    /** Return true if there's no staged additions/removals. */
+    public boolean isEmpty() {
+        return blobsForAddition.isEmpty() && blobsForRemoval.isEmpty();
+    }
+
 }
