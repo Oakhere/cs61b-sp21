@@ -82,4 +82,13 @@ public class Commit implements Serializable {
         System.out.println();
         formatter.close();
     }
+
+    /** Return true if the two commits are the same commit. */
+    @Override
+    public boolean equals(Object other) {
+        if (other.getClass() != Commit.class) {
+            return false;
+        }
+        return this.sha1.equals(((Commit) other).getSha1());
+    }
 }

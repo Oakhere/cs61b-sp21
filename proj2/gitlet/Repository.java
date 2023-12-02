@@ -421,11 +421,11 @@ public class Repository {
         }
 
         Commit split = findSplitPoint(head, other);
-        if (split == other) {
+        if (split.equals(other)) {
             message("Given branch is an ancestor of the current branch.");
             return;
         }
-        if (split == head) {
+        if (split.equals(head)) {
             checkoutBranch(branchName);
             message("Current branch fast-forwarded.");
             return;
@@ -476,7 +476,7 @@ public class Repository {
                 } else {
                     contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
                 }
-                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======" +
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n" +
                         contentInOther + ">>>>>>>";
                 writeContents(conflictFile, updatedContent);
                 add(f);
@@ -495,7 +495,7 @@ public class Repository {
         while (parentOfHead != null) {
             Commit parentOfOther = other;
             while (parentOfOther != null) {
-                if (parentOfHead == parentOfOther) {
+                if (parentOfHead.equals(parentOfOther)) {
                     return parentOfHead;
                 }
                 parentOfOther = Commit.getCommit(parentOfOther.getParent());
