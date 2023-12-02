@@ -93,8 +93,8 @@ public class Commit implements Serializable {
         System.out.println("commit " + sha1);
         // merge commits have an extra line of information
         if (!secondParent.isEmpty()) {
-            System.out.println(String.format("Merge: %s %s", parent.substring(0, 6),
-                    secondParent.substring(0, 6)));
+            System.out.println(String.format("Merge: %s %s", parent.substring(0, 7),
+                    secondParent.substring(0, 7)));
         }
         formatter.format("Date: %ta %<tb %<td %<tT %<tY %tz", timestamp, timestamp);
         System.out.println(formatter);
