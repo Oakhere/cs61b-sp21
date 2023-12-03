@@ -487,7 +487,8 @@ public class Repository {
                 } else {
                     contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
                 }
-                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n" + contentInOther + ">>>>>>>\n";
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead
+                        + "=======\n" + contentInOther + ">>>>>>>\n";
                 writeContents(conflictFile, updatedContent);
                 add(f);
             }
@@ -502,17 +503,36 @@ public class Repository {
     /** A helper method that finds the split point of the current branch
      * and the given branch. */
     public static Commit findSplitPoint(Commit head, Commit other) {
-        Commit parentOfHead = head;
-        while (parentOfHead != null) {
+        // basic algorithm: use depth-first traversal to iterate HEAD's ancestors,
+        // call them "potential(split point)", then check if any of them is the
+        // ancestor of OTHER.
+        Commit potentialOne = head;
+        Commit potentialTwo = head;
+        while (potentialOne != null || potentialTwo != null) {
             Commit parentOfOther = other;
             while (parentOfOther != null) {
-                if (parentOfHead.equals(parentOfOther)) {
-                    return parentOfHead;
+                if (potentialOne != null && potentialOne.equals(parentOfOther)) {
+                    return potentialOne;
+                }
+                if (potentialTwo != null && potentialTwo.equals(parentOfOther)) {
+                    return potentialTwo;
                 }
                 parentOfOther = Commit.getCommit(parentOfOther.getParent());
             }
-            parentOfHead = Commit.getCommit(parentOfHead.getParent());
+            potentialOne = Commit.getCommit(potentialOne.getParent());
+            potentialTwo = Commit.getCommit(potentialTwo.getSecondParent());
         }
+//        Commit parentOfHead = head;
+//        while (parentOfHead != null) {
+//            Commit parentOfOther = other;
+//            while (parentOfOther != null) {
+//                if (parentOfHead.equals(parentOfOther)) {
+//                    return parentOfHead;
+//                }
+//                parentOfOther = Commit.getCommit(parentOfOther.getParent());
+//            }
+//            parentOfHead = Commit.getCommit(parentOfHead.getParent());
+//        }
         return null;
     }
 
