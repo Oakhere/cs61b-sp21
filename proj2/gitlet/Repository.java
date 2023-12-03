@@ -374,21 +374,21 @@ public class Repository {
      * that commit node. The staging area is cleared. */
     public static void reset(String commitID) {
         branches = readObject(BRANCHES_TEXT, HashMap.class);
-        String fullCommitID = fullCommitID(commitID);
-        if (fullCommitID.isEmpty()) {
+        commitID = fullCommitID(commitID);
+        if (commitID.isEmpty()) {
             message("No commit with that id exists.");
             System.exit(0);
         }
+        String currentBranchName = branches.get("HEAD");
+        branches.put(currentBranchName, commitID);
+        writeObject(BRANCHES_TEXT, branches);
+        checkoutBranch(currentBranchName);
         // temporarily create a branch called "temp" in branches so that we can call the
         // previous checkoutBranch method.
-        branches.put(commitID, fullCommitID);
-        //branches.put("temp", commitID);
-        writeObject(BRANCHES_TEXT, branches);
-        checkoutBranch(commitID);
-        //branches.put("HEAD", commitID);
-        // remove the "temp" branch
-        //branches.remove("temp");
-        //writeObject(branchesText, branches);
+        //branches.put(commitID, fullCommitID);
+        //writeObject(BRANCHES_TEXT, branches);
+        //checkoutBranch(commitID);
+
     }
 
     /** Merges files from the given branch("other") into the current branch("head"). */
