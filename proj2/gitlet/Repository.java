@@ -126,6 +126,7 @@ public class Repository {
         writeObject(BRANCHES_TEXT, branches);
     }
 
+    // method overloaded with secondParent set to "" by default
     public static void commit(String message) {
         String secondParent = "";
         commit(message, secondParent);
@@ -167,7 +168,6 @@ public class Repository {
             current.printLog();
             current = Commit.getCommit(current.getParent());
         }
-        // need to handle merge commits
     }
 
     /** Like log, except displays information about all commits ever made.
@@ -271,6 +271,7 @@ public class Repository {
         File localFile = join(CWD, fileName);
         writeContents(localFile, Blob.getBlob(head.blobs.get(fileName)).contents);
     }
+
     /** Takes the version of the file as it exists in the commit with the given id, and puts it
      * in the working directory, overwriting the version of the file that’s already there if
      * there is one. The new version of the file is not staged.*/
@@ -397,7 +398,7 @@ public class Repository {
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         Commit other = Commit.getCommit(branches.get(branchName));
 
-        checkMergeFailure(stagingArea, branches, head, other, branchName);
+        checkMergeFailure(branchName, head, other);
 
         Commit split = findSplitPoint(head, other);
         if (split.equals(other)) {
@@ -468,9 +469,8 @@ public class Repository {
         }
     }
 
-    //** A helper method that checks the failure cases of merge. *
-    static void checkMergeFailure(StagingArea stagingArea, HashMap<String, String> branches,
-                                  Commit head, Commit other, String branchName) {
+    /** A helper method that checks the failure cases of merge. */
+    static void checkMergeFailure(String branchName, Commit head, Commit other) {
         if (!stagingArea.isEmpty()) {
             message("You have uncommitted changes.");
             System.exit(0);
@@ -523,5 +523,4 @@ public class Repository {
         }
         return null;
     }
-
 }

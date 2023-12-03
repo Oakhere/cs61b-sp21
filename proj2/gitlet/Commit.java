@@ -69,6 +69,7 @@ public class Commit implements Serializable {
         File f = join(Repository.GITLET_DIR, sha1 + ".txt");
         writeObject(f, this);
     }
+
     /** Get the commit object from the disk using its SHA-1 code. */
     public static Commit getCommit(String itsSha1) {
         // special case for trying to get the parent of the initial commit
