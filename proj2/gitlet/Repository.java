@@ -5,23 +5,8 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
-
-/** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
- */
+/** Represents a gitlet repository. */
 public class Repository {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Repository class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided two examples for you.
-     */
-
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
@@ -30,20 +15,20 @@ public class Repository {
     /** A mapping from branch heads to references to commits(actually their SHA-1 code),
      *  so that certain important commits have symbolic names. Exception: "HEAD" maps to
      *  the name of the current branch, e.g. "HEAD" -> "master". */
-    public static HashMap<String, String> branches;
+    static HashMap<String, String> branches;
     /** Every time we make a new commit, add it's SHA-1 to the commit tree*/
-    public static HashSet<String> commitTree;
-    public static StagingArea stagingArea;
+    static HashSet<String> commitTree;
+    static StagingArea stagingArea;
 
     /** A file to store the commit tree to disk. */
-    public static final File commitTreeText = join(GITLET_DIR, "commitTree.txt");
-    public static final File branchesText = join(GITLET_DIR, "branches.txt");
-    public static final File stagingAreaText = join(GITLET_DIR, "stagingArea.txt");
+    public static final File COMMIT_TREE_TEXT = join(GITLET_DIR, "commitTree.txt");
+    public static final File BRANCHES_TEXT = join(GITLET_DIR, "branches.txt");
+    public static final File STAGING_AREA_TEXT = join(GITLET_DIR, "stagingArea.txt");
 
     private static void setUpPersistence() {
         GITLET_DIR.mkdir();
         stagingArea = new StagingArea();
-        writeObject(stagingAreaText, stagingArea);
+        writeObject(STAGING_AREA_TEXT, stagingArea);
     }
 
     /** Creates a new Gitlet version-control system in the current directory.
@@ -54,8 +39,8 @@ public class Repository {
     public static void init() {
         // failure cases
         if (GITLET_DIR.exists()) {
-            message("A Gitlet version-control system already " +
-                    "exists in the current directory.");
+            message("A Gitlet version-control system already "
+                    + "exists in the current directory.");
             System.exit(0);
         }
         // create the commit tree, the branches map, and the initial commit
@@ -70,8 +55,8 @@ public class Repository {
         branches.put("HEAD", "master");
         // set persistence
         initial.saveCommit(initialSha1);
-        writeObject(commitTreeText, commitTree);
-        writeObject(branchesText, branches);
+        writeObject(COMMIT_TREE_TEXT, commitTree);
+        writeObject(BRANCHES_TEXT, branches);
     }
 
     /** Adds a copy of the file as it currently exists to the staging area. */
@@ -82,8 +67,8 @@ public class Repository {
             message("File does not exist.");
             System.exit(0);
         }
-        stagingArea = readObject(stagingAreaText, StagingArea.class);
-        branches = readObject(branchesText, HashMap.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
 
         // adding a tracked, unchanged file has no effect.
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
@@ -95,13 +80,13 @@ public class Repository {
         }
 
         stagingArea.add(f);
-        writeObject(stagingAreaText, stagingArea);
+        writeObject(STAGING_AREA_TEXT, stagingArea);
     }
 
     /** Saves a snapshot of tracked files in the current commit and staging area so
      * that they can be restored at a later time, creating a new commit.*/
     public static void commit(String message, String secondParent) {
-        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
         // failure cases
         if (stagingArea.isEmpty()) {
             message("No changes added to the commit.");
@@ -112,8 +97,8 @@ public class Repository {
             System.exit(0);
         }
         // find the parent commit, create a new commit
-        commitTree = readObject(commitTreeText, HashSet.class);
-        branches = readObject(branchesText, HashMap.class);
+        commitTree = readObject(COMMIT_TREE_TEXT, HashSet.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         Commit parent = Commit.getCommit(branches.get(branches.get("HEAD")));
         Commit newCommit;
         if (secondParent.isEmpty()) {
@@ -130,15 +115,15 @@ public class Repository {
         }
         // clear the staging area
         stagingArea.clear();
-        writeObject(stagingAreaText, stagingArea);
+        writeObject(STAGING_AREA_TEXT, stagingArea);
         // add the commit to the commit tree, change the pointers
         String newCommitSha1 = sha1(serialize(newCommit));
         commitTree.add(newCommitSha1);
         branches.put(branches.get("HEAD"), newCommitSha1);
         // set persistence
         newCommit.saveCommit(newCommitSha1);
-        writeObject(commitTreeText, commitTree);
-        writeObject(branchesText, branches);
+        writeObject(COMMIT_TREE_TEXT, commitTree);
+        writeObject(BRANCHES_TEXT, branches);
     }
 
     public static void commit(String message) {
@@ -151,12 +136,12 @@ public class Repository {
      * the working directory if the user has not already done so (do not remove it
      * unless it is tracked in the current commit).*/
     public static void rm(String filename) {
-        stagingArea = readObject(stagingAreaText, StagingArea.class);
-        branches = readObject(branchesText, HashMap.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         // failure cases
-        if (!stagingArea.blobsForAddition.containsKey(filename) &&
-                !head.blobs.containsKey(filename)) {
+        if (!stagingArea.blobsForAddition.containsKey(filename)
+                && !head.blobs.containsKey(filename)) {
             message("No reason to remove the file.");
             System.exit(0);
         }
@@ -168,15 +153,15 @@ public class Repository {
             restrictedDelete(filename);
             stagingArea.blobsForRemoval.add(filename);
         }
-        writeObject(stagingAreaText, stagingArea);
+        writeObject(STAGING_AREA_TEXT, stagingArea);
     }
 
     /**  Starting at the current head commit, display information about each commit
      * backwards along the commit tree until the initial commit, following the first
      * parent commit links, ignoring any second parents found in merge commits.*/
     public static void log() {
-        branches = readObject(branchesText, HashMap.class);
-        commitTree = readObject(commitTreeText, HashSet.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
+        commitTree = readObject(COMMIT_TREE_TEXT, HashSet.class);
         Commit current = Commit.getCommit(branches.get(branches.get("HEAD")));
         while (current != null) {
             current.printLog();
@@ -188,7 +173,7 @@ public class Repository {
     /** Like log, except displays information about all commits ever made.
      * The order of the commits does not matter. */
     public static void globalLog() {
-        commitTree = readObject(commitTreeText, HashSet.class);
+        commitTree = readObject(COMMIT_TREE_TEXT, HashSet.class);
         for (String sha1 : commitTree) {
             Commit current = Commit.getCommit(sha1);
             current.printLog();
@@ -197,7 +182,7 @@ public class Repository {
 
     /**  Prints out the ids of all commits that have the given commit message. */
     public static void find(String message) {
-        commitTree = readObject(commitTreeText, HashSet.class);
+        commitTree = readObject(COMMIT_TREE_TEXT, HashSet.class);
         boolean commitFound = false;
         for (String sha1 : commitTree) {
             Commit current = Commit.getCommit(sha1);
@@ -215,8 +200,8 @@ public class Repository {
     /** Displays what branches currently exist, and marks the current branch with a *.
      * Also displays what files have been staged for addition or removal. */
     public static void status() {
-        stagingArea = readObject(stagingAreaText, StagingArea.class);
-        branches = readObject(branchesText, HashMap.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         System.out.println("=== Branches ===");
         List<String> keysList = new ArrayList<>(branches.keySet());
         Collections.sort(keysList);
@@ -259,23 +244,23 @@ public class Repository {
      * Noted that a branch is nothing more than a name for a reference (a SHA-1 identifier) to
      * a commit node. */
     public static void branch(String branchName) {
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         // failure cases
         if (branches.containsKey(branchName)) {
             message("A branch with that name already exists.");
             System.exit(0);
         }
-        // find the current head commit, create a new branch and points it at the current head commit.
+        // find HEAD(current head commit), create a new branch and points it at the HEAD.
         String headSha1 = branches.get(branches.get("HEAD"));
         branches.put(branchName, headSha1);
-        writeObject(branchesText, branches);
+        writeObject(BRANCHES_TEXT, branches);
     }
 
     /** Takes the version of the file as it exists in the head commit and puts it in the working
      * directory, overwriting the version of the file that’s already there if there is one.
      * The new version of the file is not staged.*/
     public static void checkoutFile(String fileName) {
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         // failure cases
         if (!head.blobs.containsKey(fileName)) {
@@ -309,7 +294,7 @@ public class Repository {
     /** A helper method for finding the full commit id using its prefix. If such id doesn't exist,
      * return an empty string. */
     private static String fullCommitID(String prefix) {
-        commitTree = readObject(commitTreeText, HashSet.class);
+        commitTree = readObject(COMMIT_TREE_TEXT, HashSet.class);
         for (String id : commitTree) {
             if (id.startsWith(prefix)) {
                 return id;
@@ -324,7 +309,7 @@ public class Repository {
      * in the checked-out branch are deleted. The staging area is cleared, unless the checked-out
      * branch is the current branch(failure case). */
     public static void checkoutBranch(String branchName) {
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         // failure cases
         if (!branches.containsKey(branchName)) {
             message("No such branch exists.");
@@ -339,10 +324,10 @@ public class Repository {
         Set<String> fileInCurrentCommit = currentCommit.blobs.keySet();
         Set<String> fileInCheckoutCommit = checkoutCommit.blobs.keySet();
         for (String f : plainFilenamesIn(CWD)) {
-            if (!f.startsWith(".") && !fileInCurrentCommit.contains(f) &&
-                    fileInCheckoutCommit.contains(f)) {
-                message("There is an untracked file in the way; delete it, or add and " +
-                        "commit it first.");
+            if (!f.startsWith(".") && !fileInCurrentCommit.contains(f)
+                    && fileInCheckoutCommit.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and "
+                        + "commit it first.");
                 System.exit(0);
             }
         }
@@ -360,16 +345,16 @@ public class Repository {
         }
         // set the checkout branch as the current branch (HEAD)
         branches.put("HEAD", branchName);
-        writeObject(branchesText, branches);
+        writeObject(BRANCHES_TEXT, branches);
         // clear the staging area
-        stagingArea = readObject(stagingAreaText, StagingArea.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
         stagingArea.clear();
-        writeObject(stagingAreaText, stagingArea);
+        writeObject(STAGING_AREA_TEXT, stagingArea);
     }
 
     /** Deletes the branch(pointer) with the given name.*/
     public static void removeBranch(String branchName) {
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         // failure cases
         if (!branches.containsKey(branchName)) {
             message("A branch with that name does not exist.");
@@ -381,14 +366,14 @@ public class Repository {
         }
         // remove the branch name
         branches.remove(branchName);
-        writeObject(branchesText, branches);
+        writeObject(BRANCHES_TEXT, branches);
     }
 
     /** Checks out all the files tracked by the given commit. Removes tracked files
      * that are not present in that commit. Also moves the current branch’s head to
      * that commit node. The staging area is cleared. */
     public static void reset(String commitID) {
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         String fullCommitID = fullCommitID(commitID);
         if (fullCommitID.isEmpty()) {
             message("No commit with that id exists.");
@@ -398,7 +383,7 @@ public class Repository {
         // previous checkoutBranch method.
         branches.put(commitID, fullCommitID);
         //branches.put("temp", commitID);
-        writeObject(branchesText, branches);
+        writeObject(BRANCHES_TEXT, branches);
         checkoutBranch(commitID);
         //branches.put("HEAD", commitID);
         // remove the "temp" branch
@@ -409,14 +394,14 @@ public class Repository {
     /** Merges files from the given branch("other") into the current branch("head"). */
     public static void merge(String branchName) {
         boolean conflictEncountered = false;
-        StagingArea stagingArea = readObject(stagingAreaText, StagingArea.class);
+        stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
         // failure case 1
         if (!stagingArea.isEmpty()) {
             message("You have uncommitted changes.");
             System.exit(0);
         }
 
-        branches = readObject(branchesText, HashMap.class);
+        branches = readObject(BRANCHES_TEXT, HashMap.class);
         // failure case 2
         if (!branches.containsKey(branchName)) {
             message("A branch with that name does not exist.");
@@ -435,10 +420,9 @@ public class Repository {
         Set<String> fileInOther = other.blobs.keySet();
         for (String f : plainFilenamesIn(CWD)) {
             // If an untracked file in the current commit would be overwritten or deleted by merge
-            if (!f.startsWith(".") && !fileInHead.contains(f) &&
-                    fileInOther.contains(f)) {
-                message("There is an untracked file in the way; delete it, or add and " +
-                        "commit it first.");
+            if (!f.startsWith(".") && !fileInHead.contains(f) && fileInOther.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and "
+                        + "commit it first.");
                 System.exit(0);
             }
         }
@@ -499,13 +483,14 @@ public class Repository {
                 } else {
                     contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
                 }
-                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n" +
-                        contentInOther + ">>>>>>>";
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n"
+                        + contentInOther + ">>>>>>>";
                 writeContents(conflictFile, updatedContent);
                 add(f);
             }
         }
-        commit(String.format("Merged %s into %s.", branchName, branches.get("HEAD")), other.getSha1());
+        commit(String.format("Merged %s into %s.", branchName,
+                branches.get("HEAD")), other.getSha1());
         if (conflictEncountered) {
             System.out.println("Encountered a merge conflict.");
         }
@@ -528,7 +513,4 @@ public class Repository {
         return null;
     }
 
-    private static void mergeCommit(String message) {
-
-    }
 }

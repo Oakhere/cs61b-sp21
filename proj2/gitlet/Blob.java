@@ -19,8 +19,8 @@ public class Blob implements Serializable {
 
     /** Save the blob as a file in the disk with the file name being its SHA-1 code. */
     public void saveBlob() {
-        File f = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
-        writeObject(f, this);
+        File blobText = join(Repository.GITLET_DIR, sha1(serialize(this)) + ".txt");
+        writeObject(blobText, this);
     }
 
     /** Get the blob object from the disk using its SHA-1 code. */

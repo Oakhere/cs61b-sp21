@@ -1,21 +1,14 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.File;
 import java.io.Serializable;
-import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 
 import static gitlet.Utils.*;
 
-/** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
- */
+/** Represents a gitlet commit object. */
 public class Commit implements Serializable {
     /**
      * List all instance variables of the Commit class here with a useful
@@ -32,7 +25,7 @@ public class Commit implements Serializable {
     private String secondParent;
     private String sha1;
     /** A map: File name -> Blob SHA-1 */
-    public HashMap<String, String> blobs;
+    HashMap<String, String> blobs;
 
     public Commit(String message, String parent) {
         this.message = message;
@@ -77,12 +70,12 @@ public class Commit implements Serializable {
         writeObject(f, this);
     }
     /** Get the commit object from the disk using its SHA-1 code. */
-    public static Commit getCommit(String sha1) {
+    public static Commit getCommit(String itsSha1) {
         // special case for trying to get the parent of the initial commit
-        if (sha1.isEmpty()) {
+        if (itsSha1.isEmpty()) {
             return null;
         }
-        File f = join(Repository.GITLET_DIR, sha1 + ".txt");
+        File f = join(Repository.GITLET_DIR, itsSha1 + ".txt");
         return readObject(f, Commit.class);
     }
 

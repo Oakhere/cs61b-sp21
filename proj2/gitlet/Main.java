@@ -1,8 +1,6 @@
 package gitlet;
 
-/** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
- */
+/** Driver class for Gitlet, a subset of the Git version-control system. */
 public class Main {
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
