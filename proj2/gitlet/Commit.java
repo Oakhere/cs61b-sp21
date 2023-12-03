@@ -104,4 +104,11 @@ public class Commit implements Serializable {
         }
         return this.sha1.equals(((Commit) other).getSha1());
     }
+
+    /** Override original method to keep consistent with equals(). */
+    @Override
+    public int hashCode() {
+        return sha1.hashCode();
+    }
+
 }

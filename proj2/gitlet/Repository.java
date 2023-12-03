@@ -472,7 +472,7 @@ public class Repository {
                     checkoutCommitFile(other.getSha1(), f);
                     add(f);
                 }
-                // modified in both other and in HEAD, and in different ways
+            // modified in both other and in HEAD, and in different ways, i.e. conflict
             } else if (!inOther.equals(inSplit) && !inOther.equals(inHead)) {
                 conflictEncountered = true;
                 File conflictFile = join(CWD, f);
