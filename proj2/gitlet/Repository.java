@@ -519,8 +519,12 @@ public class Repository {
                 }
                 parentOfOther = Commit.getCommit(parentOfOther.getParent());
             }
-            potentialOne = Commit.getCommit(potentialOne.getParent());
-            potentialTwo = Commit.getCommit(potentialTwo.getSecondParent());
+            if (potentialOne != null) {
+                potentialOne = Commit.getCommit(potentialOne.getParent());
+            }
+            if (potentialTwo != null) {
+                potentialTwo = Commit.getCommit(potentialTwo.getSecondParent());
+            }
         }
 //        Commit parentOfHead = head;
 //        while (parentOfHead != null) {
