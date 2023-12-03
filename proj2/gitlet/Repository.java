@@ -387,49 +387,17 @@ public class Repository {
         branches.put(currentBranchName, commitID);
         branches.put("HEAD", currentBranchName);
         writeObject(BRANCHES_TEXT, branches);
-        // temporarily create a branch called "temp" in branches so that we can call the
-        // previous checkoutBranch method.
-        //branches.put(commitID, fullCommitID);
-        //writeObject(BRANCHES_TEXT, branches);
-        //checkoutBranch(commitID);
-
     }
 
     /** Merges files from the given branch("other") into the current branch("head"). */
     public static void merge(String branchName) {
         boolean conflictEncountered = false;
         stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
-        // failure case 1
-        if (!stagingArea.isEmpty()) {
-            message("You have uncommitted changes.");
-            System.exit(0);
-        }
-
         branches = readObject(BRANCHES_TEXT, HashMap.class);
-        // failure case 2
-        if (!branches.containsKey(branchName)) {
-            message("A branch with that name does not exist.");
-            System.exit(0);
-        }
-        // failure case 3
-        if (branches.get("HEAD").equals(branchName)) {
-            message("Cannot merge a branch with itself.");
-            System.exit(0);
-        }
-
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         Commit other = Commit.getCommit(branches.get(branchName));
-        // failure case 4
-        Set<String> fileInHead = head.blobs.keySet();
-        Set<String> fileInOther = other.blobs.keySet();
-        for (String f : plainFilenamesIn(CWD)) {
-            // If an untracked file in the current commit would be overwritten or deleted by merge
-            if (!f.startsWith(".") && !fileInHead.contains(f) && fileInOther.contains(f)) {
-                message("There is an untracked file in the way; delete it, or add and "
-                        + "commit it first.");
-                System.exit(0);
-            }
-        }
+
+        checkMergeFailure(stagingArea, branches, head, other, branchName);
 
         Commit split = findSplitPoint(head, other);
         if (split.equals(other)) {
@@ -500,6 +468,33 @@ public class Repository {
         }
     }
 
+    //** A helper method that checks the failure cases of merge. *
+    static void checkMergeFailure(StagingArea stagingArea, HashMap<String, String> branches,
+                                  Commit head, Commit other, String branchName) {
+        if (!stagingArea.isEmpty()) {
+            message("You have uncommitted changes.");
+            System.exit(0);
+        }
+        if (!branches.containsKey(branchName)) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branches.get("HEAD").equals(branchName)) {
+            message("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        Set<String> fileInHead = head.blobs.keySet();
+        Set<String> fileInOther = other.blobs.keySet();
+        for (String f : plainFilenamesIn(CWD)) {
+            // If an untracked file in the current commit would be overwritten or deleted by merge
+            if (!f.startsWith(".") && !fileInHead.contains(f) && fileInOther.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and "
+                        + "commit it first.");
+                System.exit(0);
+            }
+        }
+    }
+
     /** A helper method that finds the split point of the current branch
      * and the given branch. */
     public static Commit findSplitPoint(Commit head, Commit other) {
@@ -526,17 +521,6 @@ public class Repository {
                 potentialTwo = Commit.getCommit(potentialTwo.getSecondParent());
             }
         }
-//        Commit parentOfHead = head;
-//        while (parentOfHead != null) {
-//            Commit parentOfOther = other;
-//            while (parentOfOther != null) {
-//                if (parentOfHead.equals(parentOfOther)) {
-//                    return parentOfHead;
-//                }
-//                parentOfOther = Commit.getCommit(parentOfOther.getParent());
-//            }
-//            parentOfHead = Commit.getCommit(parentOfHead.getParent());
-//        }
         return null;
     }
 
