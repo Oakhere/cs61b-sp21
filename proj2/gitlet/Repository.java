@@ -487,8 +487,8 @@ public class Repository {
                 } else {
                     contentInOther = Blob.getBlob(other.blobs.get(f)).contents;
                 }
-                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "=======\n"
-                        + contentInOther + ">>>>>>>";
+                String updatedContent = "<<<<<<< HEAD\n" + contentInHead + "\n=======\n"
+                        + contentInOther + "\n>>>>>>>";
                 writeContents(conflictFile, updatedContent);
                 add(f);
             }
