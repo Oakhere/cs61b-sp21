@@ -380,9 +380,12 @@ public class Repository {
             System.exit(0);
         }
         String currentBranchName = branches.get("HEAD");
-        branches.put(currentBranchName, commitID);
+        branches.put("temp", commitID);
         writeObject(BRANCHES_TEXT, branches);
-        checkoutBranch(currentBranchName);
+        checkoutBranch("temp");
+        branches.remove("temp");
+        branches.put(currentBranchName, commitID);
+        branches.put("HEAD", currentBranchName);
         // temporarily create a branch called "temp" in branches so that we can call the
         // previous checkoutBranch method.
         //branches.put(commitID, fullCommitID);
