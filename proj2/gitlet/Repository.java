@@ -394,11 +394,36 @@ public class Repository {
     public static void merge(String branchName) {
         boolean conflictEncountered = false;
         stagingArea = readObject(STAGING_AREA_TEXT, StagingArea.class);
+        // failure case 1
+        if (!stagingArea.isEmpty()) {
+            message("You have uncommitted changes.");
+            System.exit(0);
+        }
+
         branches = readObject(BRANCHES_TEXT, HashMap.class);
+        // failure case 2 & 3
+        if (!branches.containsKey(branchName)) {
+            message("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branches.get("HEAD").equals(branchName)) {
+            message("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+
         Commit head = Commit.getCommit(branches.get(branches.get("HEAD")));
         Commit other = Commit.getCommit(branches.get(branchName));
-
-        checkMergeFailure(branchName, head, other);
+        // failure case 4
+        Set<String> fileInHead = head.blobs.keySet();
+        Set<String> fileInOther = other.blobs.keySet();
+        for (String f : plainFilenamesIn(CWD)) {
+            // If an untracked file in the current commit would be overwritten or deleted by merge
+            if (!f.startsWith(".") && !fileInHead.contains(f) && fileInOther.contains(f)) {
+                message("There is an untracked file in the way; delete it, or add and "
+                        + "commit it first.");
+                System.exit(0);
+            }
+        }
 
         Commit split = findSplitPoint(head, other);
         if (split.equals(other)) {
@@ -466,32 +491,6 @@ public class Repository {
                 branches.get("HEAD")), other.getSha1());
         if (conflictEncountered) {
             System.out.println("Encountered a merge conflict.");
-        }
-    }
-
-    /** A helper method that checks the failure cases of merge. */
-    static void checkMergeFailure(String branchName, Commit head, Commit other) {
-        if (!stagingArea.isEmpty()) {
-            message("You have uncommitted changes.");
-            System.exit(0);
-        }
-        if (!branches.containsKey(branchName)) {
-            message("A branch with that name does not exist.");
-            System.exit(0);
-        }
-        if (branches.get("HEAD").equals(branchName)) {
-            message("Cannot merge a branch with itself.");
-            System.exit(0);
-        }
-        Set<String> fileInHead = head.blobs.keySet();
-        Set<String> fileInOther = other.blobs.keySet();
-        for (String f : plainFilenamesIn(CWD)) {
-            // If an untracked file in the current commit would be overwritten or deleted by merge
-            if (!f.startsWith(".") && !fileInHead.contains(f) && fileInOther.contains(f)) {
-                message("There is an untracked file in the way; delete it, or add and "
-                        + "commit it first.");
-                System.exit(0);
-            }
         }
     }
 
