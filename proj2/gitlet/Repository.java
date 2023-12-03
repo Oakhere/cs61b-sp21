@@ -386,6 +386,7 @@ public class Repository {
         branches.remove("temp");
         branches.put(currentBranchName, commitID);
         branches.put("HEAD", currentBranchName);
+        writeObject(BRANCHES_TEXT, branches);
         // temporarily create a branch called "temp" in branches so that we can call the
         // previous checkoutBranch method.
         //branches.put(commitID, fullCommitID);
